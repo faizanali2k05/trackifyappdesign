@@ -1,0 +1,10 @@
+{
+  "description": "Manage multiple budgets with AI-powered insights, track expenses, and optimize spending through a sleek, intuitive personal finance dashboard.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

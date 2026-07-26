@@ -1,0 +1,97 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-emerald-primary: #2CC7A7;
+  --color-emerald-dark: #081A18;
+  --color-surface: #102826;
+  --color-surface-2: #163633;
+  --color-card: rgba(255,255,255,0.06);
+  --color-border: rgba(255,255,255,0.08);
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #B8C8C5;
+  --color-success: #39D98A;
+  --color-warning: #F6C343;
+  --color-error: #FF5A5F;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  background-color: #081A18;
+  color: #FFFFFF;
+}
+
+/* Hide scrollbars by default */
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Custom scrollbar for content areas */
+.scrollbar-thin::-webkit-scrollbar { width: 3px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(44,199,167,0.3); border-radius: 99px; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(44,199,167,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(44,199,167,0); }
+  100% { box-shadow: 0 0 0 0 rgba(44,199,167,0); }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease forwards;
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s infinite;
+}
+
+.glass-card {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.emerald-glow {
+  box-shadow: 0 0 20px rgba(44,199,167,0.15);
+}
+
+.emerald-glow-sm {
+  box-shadow: 0 0 12px rgba(44,199,167,0.12);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #2CC7A7 0%, #39D98A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Bottom nav safe area */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
