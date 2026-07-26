@@ -201,7 +201,7 @@ const translations: Record<Language, Record<string, string>> = {
     clearChat: "Clear Chat",
     askAnything: "Ask anything about your finances...",
     dangerZone: "Danger Zone",
-    appVersion: "Version 2.6.0 · Multi-Budget & Regional Edition",
+    appVersion: "Version 2.8.0 · Auto-Budget Switcher Edition",
   },
   ur: {
     goodMorning: "صبح بخیر",
@@ -236,7 +236,7 @@ const translations: Record<Language, Record<string, string>> = {
     clearChat: "چیٹ صاف کریں",
     askAnything: "مالیات کے بارے میں کچھ بھی پوچھیں...",
     dangerZone: "خطرناک زون",
-    appVersion: "ورژن 2.6.0 · ملٹی بجٹ ایڈیشن",
+    appVersion: "ورژن 2.8.0 · سوئچر ایڈیشن",
   },
   ar: {
     goodMorning: "صباح الخير",
@@ -271,7 +271,7 @@ const translations: Record<Language, Record<string, string>> = {
     clearChat: "مسح المحادثة",
     askAnything: "اسأل أي شيء عن أموالك...",
     dangerZone: "منطقة الخطر",
-    appVersion: "الإصدار 2.6.0 · طبعة الميزانية المتعددة",
+    appVersion: "الإصدار 2.8.0 · طبعة التبديل",
   },
   es: {
     goodMorning: "Buenos días",
@@ -306,7 +306,7 @@ const translations: Record<Language, Record<string, string>> = {
     clearChat: "Borrar Chat",
     askAnything: "Pregunta cualquier cosa sobre tus finanzas...",
     dangerZone: "Zona de Peligro",
-    appVersion: "Versión 2.6.0 · Edición Multi Presupuesto",
+    appVersion: "Versión 2.8.0 · Edición Selector Presupuesto",
   }
 }
 
@@ -355,7 +355,7 @@ const WARNING = '#F6C343'
 const ERROR = '#FF5A5F'
 const CARD_DARK_SOLID = '#143834'
 
-// ─── Icon Map for Dynamic Budget & Category Icon Resolver ─────────────────────
+// ─── Icon Map ────────────────────────────────────────────────────────────────
 
 const ICON_MAP: Record<string, React.FC<any>> = {
   Wallet, Utensils, ShoppingBag, Car, Lock, Film, Dumbbell, Coffee,
@@ -524,7 +524,7 @@ const initNotifications: NotificationItem[] = [
   { id: 5, type: 'info', title: 'Regional Clock Synced', desc: 'Calendar synced with active timezone', time: '2 days ago', read: true },
 ]
 
-// ─── AI Response Logic (STRICT NO EMOJI) ──────────────────────────────────────
+// ─── AI Response Logic ────────────────────────────────────────────────────────
 
 function processAIMessage(
   userQuery: string,
@@ -750,7 +750,7 @@ function SplashScreen({ onNext }: { onNext: () => void }) {
         </div>
         <div className="text-center">
           <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: -1, color: theme.text }}>Trackify</h1>
-          <p style={{ color: theme.textSec, fontSize: 13, marginTop: 6, letterSpacing: 0.4 }}>Plan Better. Spend Smarter. Multi-Budget Sync.</p>
+          <p style={{ color: theme.textSec, fontSize: 13, marginTop: 6, letterSpacing: 0.4 }}>Plan Better. Spend Smarter. Auto-Budget Switcher.</p>
         </div>
         <div style={{ display: 'flex', gap: 6, marginTop: 24 }}>
           {[0, 1, 2].map(i => <div key={i} style={{ width: i === 0 ? 24 : 6, height: 6, borderRadius: 3, backgroundColor: i === 0 ? EMERALD : theme.border, transition: 'all 0.3s' }} />)}
@@ -852,10 +852,140 @@ function SignInScreen({ onNext }: { onNext: () => void }) {
   )
 }
 
+// ─── Shared Trackify Green Budget Overview Card Component ─────────────────────
+
+function TrackifyGreenBudgetCard({
+  budgetName = 'Monthly Budget',
+  totalBudget,
+  totalSpent,
+  mainIconName = 'Wallet',
+  subText = 'Trackify Overview',
+  onTapCard,
+  formatMoney,
+}: {
+  budgetName?: string
+  totalBudget: number
+  totalSpent: number
+  mainIconName?: string
+  subText?: string
+  onTapCard?: () => void
+  formatMoney: (amt: number) => string
+}) {
+  const MainIcon = getBudgetIcon(mainIconName)
+  const totalRemaining = Math.max(0, totalBudget - totalSpent)
+  const usedPct = totalBudget > 0 ? Math.min(Math.round((totalSpent / totalBudget) * 100), 100) : 0
+  const remainingPct = 100 - usedPct
+
+  return (
+    <button
+      onClick={onTapCard}
+      disabled={!onTapCard}
+      style={{
+        width: '100%',
+        background: 'none',
+        border: 'none',
+        cursor: onTapCard ? 'pointer' : 'default',
+        textAlign: 'left',
+        padding: 0,
+      }}
+    >
+      <div style={{
+        background: 'linear-gradient(135deg, #143834 0%, #102826 60%, #081A18 100%)',
+        borderRadius: 20,
+        padding: '24px 20px',
+        boxShadow: '0 10px 30px rgba(8, 26, 24, 0.4), 0 0 1px 1px rgba(44, 199, 167, 0.3)',
+        color: '#FFFFFF',
+        position: 'relative',
+        overflow: 'hidden',
+        border: '1px solid rgba(44, 199, 167, 0.35)',
+      }}>
+        {/* Ambient glow */}
+        <div style={{
+          position: 'absolute',
+          top: -40,
+          right: -40,
+          width: 160,
+          height: 160,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(44, 199, 167, 0.25) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Card Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(44, 199, 167, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(44, 199, 167, 0.4)' }}>
+            <MainIcon size={22} color={EMERALD} />
+          </div>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{budgetName}</h2>
+            <p style={{ fontSize: 12, color: EMERALD, margin: 0, marginTop: 2, fontWeight: 600 }}>{subText}</p>
+          </div>
+        </div>
+
+        {/* Total Budget */}
+        <div style={{ marginBottom: 20 }}>
+          <p style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.8)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Total Budget Limit</p>
+          <p style={{ fontSize: 34, fontWeight: 800, color: '#FFFFFF', margin: 0, marginTop: 4, letterSpacing: -0.5 }}>
+            {formatMoney(totalBudget)}
+          </p>
+        </div>
+
+        {/* Progress Bar & Sub-labels */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ height: 8, backgroundColor: 'rgba(255, 255, 255, 0.12)', borderRadius: 99, overflow: 'hidden', marginBottom: 8, border: '1px solid rgba(44, 199, 167, 0.2)' }}>
+            <div style={{ height: '100%', width: `${usedPct}%`, backgroundColor: usedPct > 85 ? ERROR : EMERALD, borderRadius: 99, transition: 'width 0.6s ease', boxShadow: '0 0 10px rgba(44, 199, 167, 0.6)' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
+            <span style={{ color: usedPct > 85 ? ERROR : EMERALD }}>{usedPct}% used</span>
+            <span style={{ color: 'rgba(255, 255, 255, 0.85)' }}>{remainingPct}% remaining</span>
+          </div>
+        </div>
+
+        {/* Two Trackify Glass Stat Cards (Spent & Remaining) */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {/* Spent Card */}
+          <div style={{
+            backgroundColor: 'rgba(44, 199, 167, 0.08)',
+            borderRadius: 14,
+            padding: '14px 16px',
+            border: '1px solid rgba(44, 199, 167, 0.25)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <TrendingUp size={16} color={EMERALD} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)' }}>Spent</span>
+            </div>
+            <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+              {formatMoney(totalSpent)}
+            </p>
+          </div>
+
+          {/* Remaining Card */}
+          <div style={{
+            backgroundColor: 'rgba(44, 199, 167, 0.08)',
+            borderRadius: 14,
+            padding: '14px 16px',
+            border: '1px solid rgba(44, 199, 167, 0.25)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <Wallet size={16} color={EMERALD} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)' }}>Remaining</span>
+            </div>
+            <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+              {formatMoney(totalRemaining)}
+            </p>
+          </div>
+        </div>
+      </div>
+    </button>
+  )
+}
+
 function HomeScreen({
   onNav,
   onOpenModal,
   budgets,
+  activeBudgetId,
+  onSelectBudget,
   transactions,
   onSelectTx,
   hasNotifications,
@@ -863,19 +993,21 @@ function HomeScreen({
   onNav: (s: Screen) => void
   onOpenModal: (m: string) => void
   budgets: Budget[]
+  activeBudgetId: number
+  onSelectBudget: (id: number) => void
   transactions: Transaction[]
   onSelectTx: (t: Transaction) => void
   hasNotifications: boolean
 }) {
   const { theme, isDark, toggleTheme, t, formatMoney, region, regionalTime } = useApp()
 
-  const overallBudgetLimit = budgets.find(b => b.category === 'All')?.limit || budgets.reduce((s, b) => s + b.limit, 0)
-  const fixedExpenses = transactions.filter(t => t.expenseType === 'fixed').reduce((s, t) => s + Math.abs(t.amount), 0)
-  const miscExpenses = transactions.filter(t => t.expenseType !== 'fixed' && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
-  const totalSpent = fixedExpenses + miscExpenses
+  const activeBudget = budgets.find(b => b.id === activeBudgetId) || budgets[0] || defaultBudgets[0]
+  
+  const activeBudgetSpent = transactions
+    .filter(t => t.amount < 0 && (activeBudget.category === 'All' || t.category.toLowerCase().includes(activeBudget.category.toLowerCase())))
+    .reduce((s, t) => s + Math.abs(t.amount), 0)
 
-  const budgetPct = overallBudgetLimit > 0 ? Math.min(Math.round((totalSpent / overallBudgetLimit) * 100), 100) : 0
-  const budgetRemaining = Math.max(0, overallBudgetLimit - totalSpent)
+  const budgetRemaining = Math.max(0, activeBudget.limit - activeBudgetSpent)
 
   const [liveSecTime, setLiveSecTime] = useState(() => regionalTime.timeWithSec)
   useEffect(() => {
@@ -942,32 +1074,17 @@ function HomeScreen({
         </button>
       </div>
 
-      {/* Main Budget Card */}
+      {/* Main Trackify Green Budget Card (Reflects Active Budget!) */}
       <div style={{ padding: '0 20px', marginTop: 12 }}>
-        <button onClick={() => onNav('budgets')} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}>
-          <div style={{ backgroundColor: CARD_DARK_SOLID, borderRadius: 10, padding: '20px', boxShadow: '0 8px 24px rgba(8,26,24,0.15)', border: '1px solid rgba(44,199,167,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600 }}>Monthly Budget Limit</p>
-                <p style={{ fontSize: 30, fontWeight: 700, letterSpacing: -0.8, marginTop: 4, color: '#FFFFFF' }}>{formatMoney(overallBudgetLimit)}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>Spent: {formatMoney(totalSpent)}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>•</span>
-                  <span style={{ fontSize: 12, color: '#FFFFFF', fontWeight: 600 }}>Left: {formatMoney(budgetRemaining)}</span>
-                </div>
-              </div>
-              <div style={{ position: 'relative', width: 76, height: 76 }}>
-                <CircleProgress value={totalSpent} max={overallBudgetLimit || 1} size={76} stroke={7} color="#FFFFFF" theme={{ ...theme, mode: 'dark' }} />
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{budgetPct}%</span>
-                </div>
-              </div>
-            </div>
-            <div style={{ marginTop: 16 }}>
-              <ProgressBar value={totalSpent} max={overallBudgetLimit || 1} color="#FFFFFF" height={6} theme={{ ...theme, mode: 'dark' }} />
-            </div>
-          </div>
-        </button>
+        <TrackifyGreenBudgetCard
+          budgetName={activeBudget.name}
+          totalBudget={activeBudget.limit}
+          totalSpent={activeBudgetSpent}
+          mainIconName={activeBudget.iconName}
+          subText={`Active Budget: ${activeBudget.category} (Tap to Switch)`}
+          onTapCard={() => onNav('budgets')}
+          formatMoney={formatMoney}
+        />
       </div>
 
       {/* Quick Actions */}
@@ -1007,7 +1124,7 @@ function HomeScreen({
                   {transactions.length === 0 ? (
                     "No expenses recorded yet. Tap here for AI advice on tracking Fixed & Miscellaneous entry dates!"
                   ) : (
-                    <>You have <strong>{formatMoney(budgetRemaining)}</strong> left. Tap to ask AI when your Miscellaneous expenses were entered or analyze regional trends.</>
+                    <>You have <strong>{formatMoney(budgetRemaining)}</strong> left in {activeBudget.name}. Tap to ask AI when your Miscellaneous expenses were entered!</>
                   )}
                 </p>
               </div>
@@ -1072,11 +1189,13 @@ function HomeScreen({
   )
 }
 
-// ─── Monthly Budget Limit Screen (Exact Layout from Pinterest Image - NO EMOJI) ───
+// ─── Monthly Budget Screen (Automatic Switcher on Click) ──────────────────────
 
 function BudgetsScreen({
   onNav,
   budgets,
+  activeBudgetId,
+  onSelectBudget,
   transactions,
   onAddBudget,
   onEditBudget,
@@ -1084,25 +1203,20 @@ function BudgetsScreen({
 }: {
   onNav: (s: Screen) => void
   budgets: Budget[]
+  activeBudgetId: number
+  onSelectBudget: (id: number) => void
   transactions: Transaction[]
   onAddBudget: () => void
   onEditBudget: (b: Budget) => void
   onDeleteBudget: (id: number) => void
 }) {
-  const { theme, formatMoney, region } = useApp()
+  const { theme, formatMoney } = useApp()
 
-  const overallBudgetLimit = budgets.find(b => b.category === 'All')?.limit || budgets.reduce((s, b) => s + b.limit, 0)
+  const activeBudget = budgets.find(b => b.id === activeBudgetId) || budgets[0] || defaultBudgets[0]
   
-  const totalSpent = transactions
-    .filter(t => t.amount < 0)
+  const activeBudgetSpent = transactions
+    .filter(t => t.amount < 0 && (activeBudget.category === 'All' || t.category.toLowerCase().includes(activeBudget.category.toLowerCase())))
     .reduce((s, t) => s + Math.abs(t.amount), 0)
-
-  const totalRemaining = Math.max(0, overallBudgetLimit - totalSpent)
-  const usedPct = overallBudgetLimit > 0 ? Math.min(Math.round((totalSpent / overallBudgetLimit) * 100), 100) : 0
-  const remainingPct = 100 - usedPct
-
-  const mainBudgetIconName = budgets.find(b => b.category === 'All')?.iconName || 'Wallet'
-  const MainIcon = getBudgetIcon(mainBudgetIconName)
 
   return (
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
@@ -1134,104 +1248,24 @@ function BudgetsScreen({
         </button>
       </div>
 
-      {/* Main Gradient Card (Exact Match to User Image Structure) */}
+      {/* Main Active Budget Overview Card */}
       <div style={{ padding: '0 20px', marginTop: 12 }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #7C3AED 0%, #3B82F6 100%)',
-          borderRadius: 20,
-          padding: '24px 20px',
-          boxShadow: '0 10px 30px rgba(124, 58, 237, 0.3)',
-          color: '#FFFFFF',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          {/* Background circle decoration */}
-          <div style={{
-            position: 'absolute',
-            top: -30,
-            right: -30,
-            width: 140,
-            height: 140,
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            pointerEvents: 'none',
-          }} />
-
-          {/* Card Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
-              <MainIcon size={24} color="#FFFFFF" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Monthly Budget</h2>
-              <p style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.8)', margin: 0, marginTop: 2 }}>Overview</p>
-            </div>
-          </div>
-
-          {/* Total Budget */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.85)', margin: 0, fontWeight: 500 }}>Total Budget</p>
-            <p style={{ fontSize: 34, fontWeight: 800, color: '#FFFFFF', margin: 0, marginTop: 4, letterSpacing: -0.5 }}>
-              {formatMoney(overallBudgetLimit)}
-            </p>
-          </div>
-
-          {/* Progress Bar & Percentages */}
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ height: 8, backgroundColor: 'rgba(255, 255, 255, 0.25)', borderRadius: 99, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${usedPct}%`, backgroundColor: '#FFFFFF', borderRadius: 99, transition: 'width 0.6s ease' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
-              <span>{usedPct}% used</span>
-              <span>{remainingPct}% remaining</span>
-            </div>
-          </div>
-
-          {/* Two Stat Cards (Spent & Remaining) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {/* Spent Box */}
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.18)',
-              borderRadius: 14,
-              padding: '14px 16px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <TrendingUp size={16} color="#FFFFFF" />
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)' }}>Spent</span>
-              </div>
-              <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
-                {formatMoney(totalSpent)}
-              </p>
-            </div>
-
-            {/* Remaining Box */}
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.18)',
-              borderRadius: 14,
-              padding: '14px 16px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <Wallet size={16} color="#FFFFFF" />
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)' }}>Remaining</span>
-              </div>
-              <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
-                {formatMoney(totalRemaining)}
-              </p>
-            </div>
-          </div>
-        </div>
+        <TrackifyGreenBudgetCard
+          budgetName={activeBudget.name}
+          totalBudget={activeBudget.limit}
+          totalSpent={activeBudgetSpent}
+          mainIconName={activeBudget.iconName}
+          subText={`Active Selected Budget (${activeBudget.category})`}
+          formatMoney={formatMoney}
+        />
       </div>
 
-      {/* Multiple Budgets Section */}
+      {/* Multiple Budgets Section (Clicking any budget switches automatically!) */}
       <div style={{ padding: '0 20px', marginTop: 24, paddingBottom: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
             <p style={{ fontWeight: 700, fontSize: 16, color: theme.text }}>Active Category Budgets ({budgets.length})</p>
-            <p style={{ fontSize: 11, color: theme.textSec }}>Manage individual budget limits & icons</p>
+            <p style={{ fontSize: 11, color: theme.textSec }}>Click any budget to switch automatically</p>
           </div>
           <button onClick={onAddBudget} style={{ background: 'none', border: 'none', color: EMERALD, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
             <Plus size={14} color={EMERALD} /> New Budget
@@ -1241,6 +1275,7 @@ function BudgetsScreen({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {budgets.map(b => {
             const BIcon = getBudgetIcon(b.iconName)
+            const isSelected = b.id === activeBudgetId
             const catSpent = transactions
               .filter(t => t.amount < 0 && (b.category === 'All' || t.category.toLowerCase().includes(b.category.toLowerCase())))
               .reduce((s, t) => s + Math.abs(t.amount), 0)
@@ -1248,18 +1283,42 @@ function BudgetsScreen({
             const bUsedPct = b.limit > 0 ? Math.min(Math.round((catSpent / b.limit) * 100), 100) : 0
             const bRemaining = Math.max(0, b.limit - catSpent)
 
+            const handleBudgetClick = () => {
+              onSelectBudget(b.id)
+            }
+
             return (
-              <div key={b.id} style={{ backgroundColor: theme.surface, borderRadius: 12, padding: '16px', border: `1px solid ${theme.border}`, boxShadow: theme.mode === 'light' ? '0 2px 10px rgba(0,0,0,0.04)' : 'none' }}>
+              <div
+                key={b.id}
+                style={{
+                  backgroundColor: isSelected ? 'rgba(44,199,167,0.12)' : theme.surface,
+                  borderRadius: 14,
+                  padding: '16px',
+                  border: `2px solid ${isSelected ? EMERALD : theme.border}`,
+                  boxShadow: isSelected ? '0 4px 16px rgba(44,199,167,0.2)' : theme.mode === 'light' ? '0 2px 10px rgba(0,0,0,0.04)' : 'none',
+                  transition: 'all 0.2s',
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: `${b.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <BIcon size={20} color={b.color} />
+                  <button
+                    onClick={handleBudgetClick}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: isSelected ? EMERALD : 'rgba(44,199,167,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${EMERALD}40` }}>
+                      <BIcon size={20} color={isSelected ? '#081A18' : EMERALD} />
                     </div>
                     <div>
-                      <p style={{ fontWeight: 700, fontSize: 14, color: theme.text }}>{b.name}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <p style={{ fontWeight: 700, fontSize: 14, color: theme.text }}>{b.name}</p>
+                        {isSelected && (
+                          <span style={{ fontSize: 9, fontWeight: 800, backgroundColor: EMERALD, color: '#081A18', padding: '2px 6px', borderRadius: 4 }}>
+                            ACTIVE
+                          </span>
+                        )}
+                      </div>
                       <p style={{ fontSize: 11, color: theme.textSec }}>Category: {b.category}</p>
                     </div>
-                  </div>
+                  </button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <button onClick={() => onEditBudget(b)} style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                       <Edit3 size={13} color={theme.textSec} />
@@ -1272,20 +1331,128 @@ function BudgetsScreen({
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, fontSize: 12 }}>
-                  <span style={{ color: theme.textSec }}>Spent: <strong style={{ color: theme.text }}>{formatMoney(catSpent)}</strong></span>
-                  <span style={{ color: theme.textSec }}>Limit: <strong style={{ color: theme.text }}>{formatMoney(b.limit)}</strong></span>
-                </div>
+                <button onClick={handleBudgetClick} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, fontSize: 12 }}>
+                    <span style={{ color: theme.textSec }}>Spent: <strong style={{ color: theme.text }}>{formatMoney(catSpent)}</strong></span>
+                    <span style={{ color: theme.textSec }}>Limit: <strong style={{ color: theme.text }}>{formatMoney(b.limit)}</strong></span>
+                  </div>
 
-                <ProgressBar value={catSpent} max={b.limit || 1} color={b.color} height={6} theme={theme} />
+                  <ProgressBar value={catSpent} max={b.limit || 1} color={EMERALD} height={6} theme={theme} />
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, fontSize: 11 }}>
-                  <span style={{ color: bUsedPct > 85 ? ERROR : EMERALD, fontWeight: 700 }}>{bUsedPct}% used</span>
-                  <span style={{ color: theme.textSec }}>{formatMoney(bRemaining)} left</span>
-                </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, fontSize: 11 }}>
+                    <span style={{ color: bUsedPct > 85 ? ERROR : EMERALD, fontWeight: 700 }}>{bUsedPct}% used</span>
+                    <span style={{ color: theme.textSec }}>{formatMoney(bRemaining)} left</span>
+                  </div>
+                </button>
               </div>
             )
           })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BudgetDetailScreen({
+  onBack,
+  budget,
+  transactions,
+  onEditBudget,
+  onSelectTx,
+}: {
+  onBack: () => void
+  budget: Budget
+  transactions: Transaction[]
+  onEditBudget: (b: Budget) => void
+  onSelectTx: (t: Transaction) => void
+}) {
+  const { theme, formatMoney } = useApp()
+  const BIcon = getBudgetIcon(budget.iconName)
+
+  const matchingTx = transactions.filter(t => 
+    t.amount < 0 && (budget.category === 'All' || t.category.toLowerCase().includes(budget.category.toLowerCase()))
+  )
+
+  const spent = matchingTx.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const remaining = Math.max(0, budget.limit - spent)
+  const pct = budget.limit > 0 ? Math.min(Math.round((spent / budget.limit) * 100), 100) : 0
+
+  return (
+    <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
+      {/* Top Header */}
+      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
+            <ChevronLeft size={22} color={theme.text} />
+          </button>
+          <div>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{budget.name}</h1>
+            <span style={{ fontSize: 11, color: EMERALD, fontWeight: 600 }}>Active Budget View</span>
+          </div>
+        </div>
+        <button
+          onClick={() => onEditBudget(budget)}
+          style={{
+            backgroundColor: 'rgba(44,199,167,0.15)',
+            color: EMERALD,
+            border: `1px solid ${EMERALD}40`,
+            borderRadius: 8,
+            padding: '6px 12px',
+            fontWeight: 700,
+            fontSize: 12,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}
+        >
+          <Edit3 size={13} color={EMERALD} /> Edit Settings
+        </button>
+      </div>
+
+      {/* Main Active Card */}
+      <div style={{ padding: '0 20px', marginTop: 12 }}>
+        <TrackifyGreenBudgetCard
+          budgetName={budget.name}
+          totalBudget={budget.limit}
+          totalSpent={spent}
+          mainIconName={budget.iconName}
+          subText={`Category Focus: ${budget.category}`}
+          formatMoney={formatMoney}
+        />
+      </div>
+
+      {/* Matching Transactions list */}
+      <div style={{ padding: '0 20px', marginTop: 20, paddingBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span style={{ fontWeight: 700, fontSize: 15, color: theme.text }}>
+            Transactions in {budget.name} ({matchingTx.length})
+          </span>
+        </div>
+        <div style={{ backgroundColor: theme.surface, borderRadius: 8, border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+          {matchingTx.length === 0 ? (
+            <p style={{ textAlign: 'center', padding: '24px 16px', fontSize: 13, color: theme.textSec }}>
+              No expenses recorded in this budget category yet.
+            </p>
+          ) : (
+            matchingTx.map((tItem, i) => (
+              <div key={tItem.id}>
+                {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 56 }} />}
+                <button onClick={() => onSelectTx(tItem)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '12px 14px', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: `${tItem.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <tItem.icon size={16} color={tItem.color} />
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: 600, fontSize: 13, color: theme.text }}>{tItem.name}</p>
+                      <p style={{ fontSize: 10, color: theme.textSec }}>{tItem.exactEntryDateStr || tItem.date}</p>
+                    </div>
+                  </div>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: theme.text }}>{formatMoney(tItem.amount)}</span>
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -1318,8 +1485,6 @@ function ManageBudgetModal({
     'Zap', 'Shield', 'Gift', 'Briefcase'
   ]
 
-  const colors = [EMERALD, '#60A5FA', '#F97316', '#EF4444', '#7C6FCD', '#39D98A', '#F6C343', '#EC4899']
-
   const handleSave = () => {
     const numLimit = parseFloat(limit)
     if (!name.trim() || isNaN(numLimit) || numLimit <= 0) return
@@ -1337,7 +1502,7 @@ function ManageBudgetModal({
       <div style={{ backgroundColor: theme.surface, borderRadius: '16px 16px 0 0', padding: '20px 20px 32px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 14px', flexShrink: 0 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexShrink: 0 }}>
-          <p style={{ fontWeight: 700, fontSize: 17, color: theme.text }}>{budget ? 'Edit Budget' : 'Add New Budget'}</p>
+          <p style={{ fontWeight: 700, fontSize: 17, color: theme.text }}>{budget ? 'Edit Budget Settings' : 'Add New Budget'}</p>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: theme.textSec, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Cancel</button>
         </div>
 
@@ -1382,34 +1547,16 @@ function ManageBudgetModal({
                     type="button"
                     onClick={() => setIconName(icName)}
                     style={{
-                      height: 36, borderRadius: 8, border: `1px solid ${isSelected ? color : theme.border}`,
-                      backgroundColor: isSelected ? `${color}25` : theme.inputBg,
+                      height: 36, borderRadius: 8, border: `1px solid ${isSelected ? EMERALD : theme.border}`,
+                      backgroundColor: isSelected ? 'rgba(44,199,167,0.2)' : theme.inputBg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                       transition: 'all 0.2s'
                     }}
                   >
-                    <IconComponent size={16} color={isSelected ? color : theme.textSec} />
+                    <IconComponent size={16} color={isSelected ? EMERALD : theme.textSec} />
                   </button>
                 )
               })}
-            </div>
-          </div>
-
-          {/* Color Selector */}
-          <div>
-            <label style={{ fontSize: 11, color: theme.textSec, fontWeight: 700, letterSpacing: 0.5 }}>THEME COLOR</label>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              {colors.map(c => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  style={{
-                    width: 28, height: 28, borderRadius: '50%', backgroundColor: c, border: color === c ? '2.5px solid white' : 'none',
-                    cursor: 'pointer', boxShadow: color === c ? '0 0 0 2px ' + c : 'none'
-                  }}
-                />
-              ))}
             </div>
           </div>
         </div>
@@ -1417,71 +1564,6 @@ function ManageBudgetModal({
         <button onClick={handleSave} style={{ width: '100%', padding: '14px', borderRadius: 8, backgroundColor: EMERALD, color: '#081A18', border: 'none', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginTop: 16, boxShadow: '0 4px 14px rgba(44,199,167,0.3)' }}>
           {budget ? 'Save Budget Changes' : 'Create Budget'}
         </button>
-      </div>
-    </div>
-  )
-}
-
-function BudgetDetailScreen({ onBack, theme }: { onBack: () => void; theme: Theme }) {
-  const { formatMoney } = useApp()
-  const budget = { name: 'Personal', spent: 1840, total: 3000 }
-  const pct = Math.round(budget.spent / budget.total * 100)
-  return (
-    <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
-      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-          <ChevronLeft size={22} color={theme.text} />
-        </button>
-        <h1 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>Personal Budget</h1>
-      </div>
-      <div style={{ padding: '0 20px', marginTop: 16 }}>
-        <div style={{ backgroundColor: CARD_DARK_SOLID, borderRadius: 10, padding: '24px', boxShadow: '0 8px 24px rgba(8,26,24,0.15)', border: '1px solid rgba(44,199,167,0.2)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>Budget Remaining</p>
-              <p style={{ fontSize: 34, fontWeight: 700, letterSpacing: -1, marginTop: 4, color: '#FFFFFF' }}>{formatMoney(Math.max(0, budget.total - budget.spent))}</p>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>of {formatMoney(budget.total)} total</p>
-            </div>
-            <div style={{ position: 'relative', width: 90, height: 90 }}>
-              <CircleProgress value={budget.spent} max={budget.total} size={90} stroke={8} color="#FFFFFF" theme={{ ...theme, mode: 'dark' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'white' }}>{pct}%</span>
-              </div>
-            </div>
-          </div>
-          <div style={{ marginTop: 20 }}>
-            <ProgressBar value={budget.spent} max={budget.total} color="#FFFFFF" height={8} theme={{ ...theme, mode: 'dark' }} />
-          </div>
-        </div>
-      </div>
-      <div style={{ padding: '0 20px', marginTop: 20 }}>
-        <span style={{ fontWeight: 600, fontSize: 15, color: theme.text }}>Daily Spending</span>
-        <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '16px', border: `1px solid ${theme.border}`, marginTop: 12 }}>
-          <ResponsiveContainer width="100%" height={130}>
-            <BarChart data={weeklyData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
-              <XAxis dataKey="day" tick={{ fontSize: 10, fill: theme.textSec }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ backgroundColor: theme.tooltipBg, border: `1px solid ${theme.border}`, borderRadius: 8, fontSize: 12, color: theme.text }} formatter={(v: any) => [`$${v}`, 'Spent']} />
-              <Bar dataKey="expense" fill={EMERALD} radius={[2, 2, 0, 0]} opacity={0.85} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      <div style={{ padding: '0 20px', marginTop: 20, paddingBottom: 24 }}>
-        <span style={{ fontWeight: 600, fontSize: 15, color: theme.text }}>Category Breakdown</span>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
-          {categoryData.slice(0, 4).map(c => (
-            <div key={c.name} style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '12px 16px', border: `1px solid ${theme.border}` }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: c.color }} />
-                  <span style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>{c.name}</span>
-                </div>
-                <span style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>{c.value}%</span>
-              </div>
-              <ProgressBar value={c.value} max={100} color={c.color} height={4} theme={theme} />
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   )
@@ -2923,6 +3005,7 @@ export default function App() {
   const [isDark, setIsDark] = useState(false)
   const [screen, setScreen] = useState<Screen>(() => hasLoggedIn ? 'home' : 'splash')
   const [budgets, setBudgets] = useState<Budget[]>(defaultBudgets)
+  const [activeBudgetId, setActiveBudgetId] = useState<number>(1)
   const [transactions, setTransactions] = useState<Transaction[]>(initTransactions)
   const [notificationsList, setNotificationsList] = useState<NotificationItem[]>(initNotifications)
   const [activeModal, setActiveModal] = useState<string | null>(null)
@@ -2936,6 +3019,7 @@ export default function App() {
   const region = REGIONS[regionCode] || REGIONS.PK
   const [regionalTime, setRegionalTime] = useState(() => getRegionalTimeInfo(region.timezone))
 
+  const activeBudget = budgets.find(b => b.id === activeBudgetId) || budgets[0] || defaultBudgets[0]
   const overallMonthlyLimit = budgets.find(b => b.category === 'All')?.limit || budgets.reduce((s, b) => s + b.limit, 0)
 
   useEffect(() => {
@@ -2974,6 +3058,16 @@ export default function App() {
     setTransactions(prev => [{ id: Date.now(), ...t }, ...prev])
   }
 
+  // Budget Selection & Switcher Handler
+  const handleSelectBudget = (id: number) => {
+    setActiveBudgetId(id)
+    const selectedB = budgets.find(b => b.id === id)
+    if (selectedB) {
+      setToastMsg(`Switched to ${selectedB.name}`)
+      setTimeout(() => setToastMsg(null), 2000)
+    }
+  }
+
   // Budget Management handlers
   const handleOpenAddBudget = () => {
     setEditingBudget(null)
@@ -2987,6 +3081,9 @@ export default function App() {
 
   const handleDeleteBudget = (id: number) => {
     setBudgets(prev => prev.filter(b => b.id !== id))
+    if (activeBudgetId === id) {
+      setActiveBudgetId(1)
+    }
     setToastMsg("Budget deleted")
     setTimeout(() => setToastMsg(null), 2000)
   }
@@ -2998,7 +3095,8 @@ export default function App() {
     } else {
       const newBudget: Budget = { id: Date.now(), ...data }
       setBudgets(prev => [...prev, newBudget])
-      setToastMsg("New budget created")
+      setActiveBudgetId(newBudget.id)
+      setToastMsg(`Created & switched to ${newBudget.name}`)
     }
     setTimeout(() => setToastMsg(null), 2000)
   }
@@ -3021,6 +3119,7 @@ export default function App() {
       setTransactions(initTransactions)
       setNotificationsList(initNotifications)
       setBudgets(defaultBudgets)
+      setActiveBudgetId(1)
       setToastMsg(lang === 'ur' ? "ڈیمو ڈیٹا لوڈ ہو گیا!" : "Demo data loaded successfully!")
       setTimeout(() => setToastMsg(null), 3000)
       return
@@ -3032,6 +3131,7 @@ export default function App() {
     setTransactions([])
     setNotificationsList([])
     setBudgets([{ id: 1, name: 'Overall Monthly Budget', limit: 0, category: 'All', iconName: 'Wallet', color: '#2CC7A7' }])
+    setActiveBudgetId(1)
     setActiveModal(null)
     setScreen('home')
     setToastMsg(lang === 'ur' ? "ایپ کا ڈیٹا ری سیٹ ($0) ہو گیا!" : "App data has been reset to defaults ($0)!")
@@ -3044,6 +3144,7 @@ export default function App() {
     setTransactions(initTransactions)
     setNotificationsList(initNotifications)
     setBudgets(defaultBudgets)
+    setActiveBudgetId(1)
     setScreen('home')
   }
 
@@ -3056,17 +3157,17 @@ export default function App() {
       case 'splash': return <SplashScreen onNext={() => setScreen('onboarding')} />
       case 'onboarding': return <OnboardingScreen onNext={() => setScreen('signin')} />
       case 'signin': return <SignInScreen onNext={handleSignIn} />
-      case 'home': return <HomeScreen onNav={setScreen} onOpenModal={handleOpenModal} budgets={budgets} transactions={transactions} onSelectTx={setSelectedTxDetail} hasNotifications={hasUnreadNotifs} />
-      case 'budgets': return <BudgetsScreen onNav={setScreen} budgets={budgets} transactions={transactions} onAddBudget={handleOpenAddBudget} onEditBudget={handleOpenEditBudget} onDeleteBudget={handleDeleteBudget} />
+      case 'home': return <HomeScreen onNav={setScreen} onOpenModal={handleOpenModal} budgets={budgets} activeBudgetId={activeBudgetId} onSelectBudget={handleSelectBudget} transactions={transactions} onSelectTx={setSelectedTxDetail} hasNotifications={hasUnreadNotifs} />
+      case 'budgets': return <BudgetsScreen onNav={setScreen} budgets={budgets} activeBudgetId={activeBudgetId} onSelectBudget={handleSelectBudget} transactions={transactions} onAddBudget={handleOpenAddBudget} onEditBudget={handleOpenEditBudget} onDeleteBudget={handleDeleteBudget} />
       case 'expenses': return <ExpensesScreen onNav={setScreen} transactions={transactions} onDelete={deleteTransaction} onSelectTx={setSelectedTxDetail} />
       case 'ai': return <AIScreen onNav={setScreen} transactions={transactions} monthlyBudgetLimit={overallMonthlyLimit} />
       case 'analytics': return <AnalyticsScreen onNav={setScreen} transactions={transactions} />
       case 'profile': return <ProfileScreen onNav={setScreen} onOpenModal={handleOpenModal} monthlyBudgetLimit={overallMonthlyLimit} transactions={transactions} />
       case 'settings': return <SettingsScreen onBack={() => setScreen('profile')} isDark={isDark} toggleTheme={toggleTheme} onOpenModal={handleOpenModal} onNav={setScreen} />
       case 'add-expense': return <AddExpenseScreen onBack={() => setScreen('expenses')} onAdd={handleAddExpense} />
-      case 'budget-detail': return <BudgetDetailScreen onBack={() => setScreen('budgets')} theme={theme} />
+      case 'budget-detail': return <BudgetDetailScreen onBack={() => setScreen('budgets')} budget={activeBudget} transactions={transactions} onEditBudget={handleOpenEditBudget} onSelectTx={setSelectedTxDetail} />
       case 'notifications': return <NotificationsScreen onBack={() => setScreen('home')} notifs={notificationsList} onRemove={handleRemoveNotif} onClearAll={handleClearAllNotifs} />
-      default: return <HomeScreen onNav={setScreen} onOpenModal={handleOpenModal} budgets={budgets} transactions={transactions} onSelectTx={setSelectedTxDetail} hasNotifications={hasUnreadNotifs} />
+      default: return <HomeScreen onNav={setScreen} onOpenModal={handleOpenModal} budgets={budgets} activeBudgetId={activeBudgetId} onSelectBudget={handleSelectBudget} transactions={transactions} onSelectTx={setSelectedTxDetail} hasNotifications={hasUnreadNotifs} />
     }
   }
 
