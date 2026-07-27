@@ -9,7 +9,7 @@ import {
   RefreshCw, Eye, EyeOff, Lock, DollarSign, Activity, AlertTriangle, CreditCard,
   Clock, Mail, PieChart as PieIcon,
   ShieldCheck, Cpu, CheckCircle2, Calculator, FileText, Calendar, MapPin, Info,
-  Heart, GraduationCap, Plane, Zap, Gift, Briefcase
+  Heart, GraduationCap, Plane, Zap, Gift, Briefcase, User, X
 } from 'lucide-react'
 import {
   BarChart, Bar, PieChart as RechartsPie, Pie, Cell,
@@ -113,12 +113,14 @@ export function getRegionalTimeInfo(timezone: string, date: Date = new Date()) {
       minute: '2-digit',
       second: '2-digit',
       hour12: true,
+      hourCycle: 'h12',
     })
     const shortTimeFormatter = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
+      hourCycle: 'h12',
     })
     const dateFormatter = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
@@ -157,12 +159,12 @@ export function getRegionalTimeInfo(timezone: string, date: Date = new Date()) {
   } catch {
     const now = date
     return {
-      timeWithSec: now.toLocaleTimeString(),
-      shortTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timeWithSec: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, hourCycle: 'h12' }),
+      shortTime: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, hourCycle: 'h12' }),
       dateStr: now.toDateString(),
-      fullDateStr: now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      fullDateStr: now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
       isoDate: now.toISOString().split('T')[0],
-      monthYearStr: now.toLocaleDateString(undefined, { year: 'numeric', month: 'long' }),
+      monthYearStr: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
     }
   }
 }
@@ -310,6 +312,13 @@ const translations: Record<Language, Record<string, string>> = {
   }
 }
 
+export function getInitials(name: string): string {
+  if (!name || !name.trim()) return 'U'
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
 interface AppContextType {
   theme: Theme
   isDark: boolean
@@ -324,6 +333,10 @@ interface AppContextType {
   setLang: (l: Language) => void
   t: (key: string) => string
   formatMoney: (amount: number) => string
+  userName: string
+  userEmail: string
+  setUserName: (n: string) => void
+  setUserEmail: (e: string) => void
 }
 
 const AppCtx = createContext<AppContextType>({
@@ -340,6 +353,10 @@ const AppCtx = createContext<AppContextType>({
   setLang: () => {},
   t: (k: string) => k,
   formatMoney: (a: number) => `$${a}`,
+  userName: 'Alex Johnson',
+  userEmail: 'alex@example.com',
+  setUserName: () => {},
+  setUserEmail: () => {},
 })
 
 const useApp = () => useContext(AppCtx)
@@ -447,7 +464,7 @@ const initTransactions: Transaction[] = [
     exactEntryDateStr: 'Jul 27, 2026 at 09:30:15 AM PKT',
     regionCode: 'PK',
     icon: Coffee,
-    color: '#A0522D',
+    color: '#00704A',
     expenseType: 'miscellaneous',
   },
   {
@@ -461,7 +478,7 @@ const initTransactions: Transaction[] = [
     exactEntryDateStr: 'Jul 25, 2026 at 10:00:00 AM PKT',
     regionCode: 'PK',
     icon: Lock,
-    color: '#60A5FA',
+    color: '#3B82F6',
     expenseType: 'fixed',
   },
   {
@@ -475,7 +492,7 @@ const initTransactions: Transaction[] = [
     exactEntryDateStr: 'Jul 26, 2026 at 04:15:30 PM PKT',
     regionCode: 'PK',
     icon: ShoppingBag,
-    color: '#F97316',
+    color: '#FF9900',
     expenseType: 'miscellaneous',
   },
   {
@@ -489,7 +506,7 @@ const initTransactions: Transaction[] = [
     exactEntryDateStr: 'Jul 26, 2026 at 08:40:12 PM PKT',
     regionCode: 'PK',
     icon: Car,
-    color: '#3B82F6',
+    color: '#111827',
     expenseType: 'miscellaneous',
   },
   {
@@ -503,7 +520,7 @@ const initTransactions: Transaction[] = [
     exactEntryDateStr: 'Jul 24, 2026 at 02:00:00 PM PKT',
     regionCode: 'PK',
     icon: Film,
-    color: '#EF4444',
+    color: '#E50914',
     expenseType: 'fixed',
   },
 ]
@@ -619,8 +636,9 @@ function StatusBar() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px 0', height: 54, position: 'relative', zIndex: 11 }}>
-      <span style={{ color: theme.text, fontSize: 13, fontWeight: 700, letterSpacing: 0.2, minWidth: 64, display: 'flex', alignItems: 'center', gap: 4 }}>
-        {timeStr} <span style={{ fontSize: 9, color: EMERALD, fontWeight: 800 }}>{region.tzAbbrev}</span>
+      <span style={{ color: theme.text, fontSize: 12, fontWeight: 700, letterSpacing: 0.2, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <span>{timeStr}</span>
+        <span style={{ fontSize: 9, color: EMERALD, fontWeight: 800, backgroundColor: 'rgba(44,199,167,0.15)', padding: '1px 4px', borderRadius: 3, lineHeight: 1 }}>{region.tzAbbrev}</span>
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         {/* Signal bars */}
@@ -792,36 +810,50 @@ function OnboardingScreen({ onNext }: { onNext: () => void }) {
   )
 }
 
-function SignInScreen({ onNext }: { onNext: () => void }) {
+function SignInScreen({ onNext }: { onNext: (email?: string, name?: string) => void }) {
   const { theme } = useTheme()
   const [showPass, setShowPass] = useState(false)
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [pass, setPass] = useState('')
+
+  const handleSignIn = () => {
+    onNext(email.trim() || undefined, name.trim() || undefined)
+  }
+
   return (
-    <div style={{ backgroundColor: theme.bg, flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 24px 32px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
+    <div style={{ backgroundColor: theme.bg, flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 24px 32px', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 30 }}>
         <div style={{ width: 40, height: 40, backgroundColor: theme.surface, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${theme.border}` }}>
           <img src={logoWhite} alt="Trackify" style={{ width: 24, height: 24, objectFit: 'contain', filter: theme.mode === 'dark' ? 'brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(120deg)' : 'invert(55%) sepia(80%) saturate(400%) hue-rotate(130deg)' }} />
         </div>
         <span style={{ fontWeight: 700, fontSize: 18, color: theme.text, letterSpacing: -0.3 }}>Trackify</span>
       </div>
       <h2 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -0.5, marginBottom: 8, color: theme.text }}>Welcome back</h2>
-      <p style={{ color: theme.textSec, fontSize: 14, marginBottom: 36 }}>Sign in to your account</p>
+      <p style={{ color: theme.textSec, fontSize: 14, marginBottom: 28 }}>Sign in to your account</p>
       <div className="flex flex-col gap-4">
         <div>
-          <label style={{ fontSize: 11, color: theme.textSec, fontWeight: 600, letterSpacing: 0.5 }}>EMAIL</label>
-          <div style={{ backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 14px', marginTop: 8, gap: 10 }}>
-            <Mail size={16} color={theme.textSec} />
+          <label style={{ fontSize: 11, color: theme.textSec, fontWeight: 600, letterSpacing: 0.5 }}>FULL NAME (OPTIONAL)</label>
+          <div style={{ backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 14px', marginTop: 6, gap: 10 }}>
+            <User size={16} color={EMERALD} />
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="Alex Johnson" type="text"
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 14, padding: '12px 0' }} />
+          </div>
+        </div>
+        <div>
+          <label style={{ fontSize: 11, color: theme.textSec, fontWeight: 600, letterSpacing: 0.5 }}>SIGN UP EMAIL</label>
+          <div style={{ backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 14px', marginTop: 6, gap: 10 }}>
+            <Mail size={16} color={EMERALD} />
             <input value={email} onChange={e => setEmail(e.target.value)} placeholder="alex@example.com" type="email"
-              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 14, padding: '14px 0' }} />
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 14, padding: '12px 0' }} />
           </div>
         </div>
         <div>
           <label style={{ fontSize: 11, color: theme.textSec, fontWeight: 600, letterSpacing: 0.5 }}>PASSWORD</label>
-          <div style={{ backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 14px', marginTop: 8, gap: 10 }}>
+          <div style={{ backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 14px', marginTop: 6, gap: 10 }}>
             <Lock size={16} color={theme.textSec} />
             <input value={pass} onChange={e => setPass(e.target.value)} type={showPass ? 'text' : 'password'} placeholder="••••••••"
-              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 14, padding: '14px 0' }} />
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 14, padding: '12px 0' }} />
             <button onClick={() => setShowPass(s => !s)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
               {showPass ? <EyeOff size={16} color={theme.textSec} /> : <Eye size={16} color={theme.textSec} />}
             </button>
@@ -830,7 +862,7 @@ function SignInScreen({ onNext }: { onNext: () => void }) {
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <span style={{ color: EMERALD, fontSize: 13, cursor: 'pointer', fontWeight: 500 }}>Forgot password?</span>
         </div>
-        <button onClick={onNext} style={{ backgroundColor: EMERALD, color: '#081A18', fontWeight: 700, fontSize: 15, padding: '16px', borderRadius: 8, width: '100%', border: 'none', cursor: 'pointer', marginTop: 4, boxShadow: '0 4px 14px rgba(44,199,167,0.25)' }}>Sign In</button>
+        <button onClick={handleSignIn} style={{ backgroundColor: EMERALD, color: '#081A18', fontWeight: 700, fontSize: 15, padding: '16px', borderRadius: 8, width: '100%', border: 'none', cursor: 'pointer', marginTop: 4, boxShadow: '0 4px 14px rgba(44,199,167,0.25)' }}>Sign In</button>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '28px 0' }}>
         <div style={{ flex: 1, height: 1, backgroundColor: theme.border }} />
@@ -890,31 +922,19 @@ function TrackifyGreenBudgetCard({
       }}
     >
       <div style={{
-        background: 'linear-gradient(135deg, #143834 0%, #102826 60%, #081A18 100%)',
-        borderRadius: 20,
+        backgroundColor: '#165B51',
+        borderRadius: 4,
         padding: '24px 20px',
-        boxShadow: '0 10px 30px rgba(8, 26, 24, 0.4), 0 0 1px 1px rgba(44, 199, 167, 0.3)',
+        boxShadow: '0 8px 24px rgba(22, 91, 81, 0.45)',
         color: '#FFFFFF',
         position: 'relative',
         overflow: 'hidden',
-        border: '1px solid rgba(44, 199, 167, 0.35)',
+        border: 'none',
       }}>
-        {/* Ambient glow */}
-        <div style={{
-          position: 'absolute',
-          top: -40,
-          right: -40,
-          width: 160,
-          height: 160,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(44, 199, 167, 0.25) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-
         {/* Card Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(44, 199, 167, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(44, 199, 167, 0.4)' }}>
-            <MainIcon size={22} color={EMERALD} />
+          <div style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(44, 199, 167, 0.4)' }}>
+            <MainIcon size={22} color="#081A18" strokeWidth={2.5} />
           </div>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{budgetName}</h2>
@@ -932,8 +952,8 @@ function TrackifyGreenBudgetCard({
 
         {/* Progress Bar & Sub-labels */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ height: 8, backgroundColor: 'rgba(255, 255, 255, 0.12)', borderRadius: 99, overflow: 'hidden', marginBottom: 8, border: '1px solid rgba(44, 199, 167, 0.2)' }}>
-            <div style={{ height: '100%', width: `${usedPct}%`, backgroundColor: usedPct > 85 ? ERROR : EMERALD, borderRadius: 99, transition: 'width 0.6s ease', boxShadow: '0 0 10px rgba(44, 199, 167, 0.6)' }} />
+          <div style={{ height: 8, backgroundColor: 'rgba(255, 255, 255, 0.15)', borderRadius: 2, overflow: 'hidden', marginBottom: 8, border: 'none' }}>
+            <div style={{ height: '100%', width: `${usedPct}%`, backgroundColor: usedPct > 85 ? ERROR : EMERALD, borderRadius: 2, transition: 'width 0.6s ease', boxShadow: '0 0 10px rgba(44, 199, 167, 0.6)' }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
             <span style={{ color: usedPct > 85 ? ERROR : EMERALD }}>{usedPct}% used</span>
@@ -941,18 +961,20 @@ function TrackifyGreenBudgetCard({
           </div>
         </div>
 
-        {/* Two Trackify Glass Stat Cards (Spent & Remaining) */}
+        {/* Two Trackify Solid Stat Cards (Spent & Remaining) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {/* Spent Card */}
           <div style={{
-            backgroundColor: 'rgba(44, 199, 167, 0.08)',
-            borderRadius: 14,
+            backgroundColor: '#081A18',
+            borderRadius: 4,
             padding: '14px 16px',
-            border: '1px solid rgba(44, 199, 167, 0.25)',
+            border: 'none',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <TrendingUp size={16} color={EMERALD} />
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)' }}>Spent</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 4, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+                <TrendingUp size={14} color="#081A18" strokeWidth={2.5} />
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF' }}>Spent</span>
             </div>
             <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
               {formatMoney(totalSpent)}
@@ -961,14 +983,16 @@ function TrackifyGreenBudgetCard({
 
           {/* Remaining Card */}
           <div style={{
-            backgroundColor: 'rgba(44, 199, 167, 0.08)',
-            borderRadius: 14,
+            backgroundColor: '#081A18',
+            borderRadius: 4,
             padding: '14px 16px',
-            border: '1px solid rgba(44, 199, 167, 0.25)',
+            border: 'none',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <Wallet size={16} color={EMERALD} />
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)' }}>Remaining</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 4, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+                <Wallet size={14} color="#081A18" strokeWidth={2.5} />
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF' }}>Remaining</span>
             </div>
             <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
               {formatMoney(totalRemaining)}
@@ -999,23 +1023,25 @@ function HomeScreen({
   onSelectTx: (t: Transaction) => void
   hasNotifications: boolean
 }) {
-  const { theme, isDark, toggleTheme, t, formatMoney, region, regionalTime } = useApp()
+  const { theme, isDark, toggleTheme, t, formatMoney, region, regionalTime, userName } = useApp()
+  const activeBudget = budgets.find(b => b.id === activeBudgetId) || budgets[0] || { id: 1, name: 'Overall Monthly Budget', limit: 3000, category: 'All', iconName: 'Wallet', color: EMERALD }
 
-  const activeBudget = budgets.find(b => b.id === activeBudgetId) || budgets[0] || defaultBudgets[0]
-  
   const activeBudgetSpent = transactions
     .filter(t => t.amount < 0 && (activeBudget.category === 'All' || t.category.toLowerCase().includes(activeBudget.category.toLowerCase())))
-    .reduce((s, t) => s + Math.abs(t.amount), 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
   const budgetRemaining = Math.max(0, activeBudget.limit - activeBudgetSpent)
 
-  const [liveSecTime, setLiveSecTime] = useState(() => regionalTime.timeWithSec)
+  const [liveSecTime, setLiveSecTime] = useState('')
   useEffect(() => {
     const timer = setInterval(() => {
-      setLiveSecTime(getRegionalTimeInfo(region.timezone).timeWithSec)
+      const info = getRegionalTimeInfo(region.timezone)
+      setLiveSecTime(info.timeWithSec)
     }, 1000)
+    const init = getRegionalTimeInfo(region.timezone)
+    setLiveSecTime(init.timeWithSec)
     return () => clearInterval(timer)
-  }, [region.timezone])
+  }, [region])
 
   return (
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
@@ -1024,25 +1050,25 @@ function HomeScreen({
         <button onClick={() => onNav('profile')} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
           <div style={{ width: 38, height: 38, borderRadius: 8, overflow: 'hidden', border: `2px solid rgba(44,199,167,0.3)` }}>
             <div style={{ width: '100%', height: '100%', backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#081A18' }}>AJ</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#081A18' }}>{getInitials(userName)}</span>
             </div>
           </div>
           <div>
             <p style={{ fontSize: 11, color: theme.textSec }}>{t('goodMorning')}</p>
-            <p style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.2, color: theme.text }}>Alex Johnson</p>
+            <p style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.2, color: theme.text }}>{userName}</p>
           </div>
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={() => onOpenModal('calendar')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: 'rgba(44,199,167,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${EMERALD}40`, cursor: 'pointer' }}>
-            <Calendar size={18} color={EMERALD} />
+          <button onClick={() => onOpenModal('calendar')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <Calendar size={18} color="#081A18" strokeWidth={2} />
           </button>
-          <button onClick={toggleTheme} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: theme.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${theme.border}`, cursor: 'pointer' }}>
-            {isDark ? <Sun size={16} color={WARNING} fill={WARNING} /> : <Moon size={16} color={theme.textSec} fill={theme.textSec} />}
+          <button onClick={toggleTheme} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: isDark ? WARNING : EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: `0 2px 6px ${(isDark ? WARNING : EMERALD)}35` }}>
+            {isDark ? <Sun size={16} color="#081A18" fill="#081A18" /> : <Moon size={16} color="#081A18" fill="#081A18" />}
           </button>
-          <button onClick={() => onNav('notifications')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: theme.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${theme.border}`, position: 'relative', cursor: 'pointer' }}>
-            <Bell size={16} color={theme.textSec} />
+          <button onClick={() => onNav('notifications')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', position: 'relative', cursor: 'pointer', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <Bell size={16} color="#081A18" strokeWidth={2} />
             {hasNotifications && (
-              <div style={{ position: 'absolute', top: 7, right: 7, width: 6, height: 6, borderRadius: 3, backgroundColor: ERROR, border: `1.5px solid ${theme.bg}` }} />
+              <div style={{ position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: 4, backgroundColor: ERROR, border: `1.5px solid ${theme.bg}` }} />
             )}
           </button>
         </div>
@@ -1051,24 +1077,24 @@ function HomeScreen({
       {/* Regional Time & Calendar Bar */}
       <div style={{ padding: '0 20px', marginTop: 10 }}>
         <button onClick={() => onOpenModal('calendar')} style={{ width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
-          <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '10px 14px', border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: EMERALD, backgroundColor: 'rgba(44,199,167,0.15)', padding: '2px 6px', borderRadius: 4 }}>
-                {region.flagTag}
-              </span>
-              <div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: theme.text, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  {region.name} Calendar <span style={{ fontSize: 10, color: EMERALD, fontWeight: 800 }}>({region.tzAbbrev})</span>
+          <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '10px 14px', border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+                <Calendar size={18} color="#081A18" strokeWidth={2} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: theme.text, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {region.code} · {region.name} Calendar
                 </p>
-                <p style={{ fontSize: 10, color: theme.textSec }}>{regionalTime.dateStr}</p>
+                <p style={{ fontSize: 11, color: theme.textSec, margin: 0, marginTop: 2 }}>{regionalTime.dateStr}</p>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: 12, fontWeight: 800, color: EMERALD, fontFamily: 'monospace' }}>{liveSecTime}</p>
-                <p style={{ fontSize: 9, color: theme.textSec }}>Live Sync</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center' }}>
+                <span style={{ fontSize: 12, fontWeight: 800, color: EMERALD, fontFamily: 'monospace', lineHeight: 1.2 }}>{liveSecTime}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: theme.textSec, marginTop: 1, lineHeight: 1 }}>{region.tzAbbrev}</span>
               </div>
-              <ChevronRight size={14} color={theme.textSec} />
+              <ChevronRight size={16} color={theme.textSec} style={{ flexShrink: 0 }} />
             </div>
           </div>
         </button>
@@ -1098,8 +1124,8 @@ function HomeScreen({
             { icon: FileText, label: 'Notes', action: () => onOpenModal('notes') },
           ].map(({ icon: Icon, label, action }) => (
             <button key={label} onClick={action} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer' }}>
-              <div style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${theme.border}` }}>
-                <Icon size={18} color={EMERALD} strokeWidth={1.5} />
+              <div style={{ width: 44, height: 44, borderRadius: 10, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(44,199,167,0.35)' }}>
+                <Icon size={18} color="#081A18" strokeWidth={2} />
               </div>
               <span style={{ fontSize: 11, color: theme.textSec, fontWeight: 500 }}>{label}</span>
             </button>
@@ -1107,20 +1133,22 @@ function HomeScreen({
         </div>
       </div>
 
-      {/* AI Insight Card */}
+      {/* AI Insight / Advisor Card */}
       <div style={{ padding: '0 20px', marginTop: 20 }}>
         <button onClick={() => onNav('ai')} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-          <div style={{ backgroundColor: EMERALD, borderRadius: 8, padding: '16px', boxShadow: '0 4px 16px rgba(44,199,167,0.3)', border: `1px solid ${EMERALD}` }}>
+          <div style={{ backgroundColor: EMERALD, borderRadius: 10, padding: '16px', boxShadow: '0 4px 16px rgba(44,199,167,0.4)', border: 'none' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: '#081A18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Sparkles size={18} color={EMERALD} fill={EMERALD} />
+              <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#081A18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(8,26,24,0.4)' }}>
+                <Sparkles size={20} color={EMERALD} fill={EMERALD} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#081A18', letterSpacing: 0.6 }}>TRACKIFY AI INSIGHT</span>
-                  <ArrowRight size={16} color="#081A18" />
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#081A18', letterSpacing: 0.6 }}>TRACKIFY AI ADVISOR</span>
+                  <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#081A18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ArrowRight size={14} color={EMERALD} strokeWidth={2.5} />
+                  </div>
                 </div>
-                <p style={{ fontSize: 13, marginTop: 4, lineHeight: 1.5, color: '#081A18', fontWeight: 600 }}>
+                <p style={{ fontSize: 13, marginTop: 6, lineHeight: 1.5, color: '#081A18', fontWeight: 600 }}>
                   {transactions.length === 0 ? (
                     "No expenses recorded yet. Tap here for AI advice on tracking Fixed & Miscellaneous entry dates!"
                   ) : (
@@ -1158,15 +1186,19 @@ function HomeScreen({
                   {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 64 }} />}
                   <button onClick={() => onSelectTx(tItem)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: `${tItem.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <tItem.icon size={18} color={tItem.color} strokeWidth={1.5} />
+                      <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: tItem.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 3px 10px ${(tItem.color || EMERALD)}40` }}>
+                        <tItem.icon size={18} color="#FFFFFF" strokeWidth={2} />
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <p style={{ fontWeight: 600, fontSize: 13, color: theme.text }}>{tItem.name}</p>
-                          {isMisc && (
-                            <span style={{ backgroundColor: 'rgba(44,199,167,0.15)', color: EMERALD, fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>
-                              Misc
+                          {isMisc ? (
+                            <span style={{ backgroundColor: EMERALD, color: '#081A18', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3, boxShadow: '0 2px 6px rgba(44,199,167,0.3)' }}>
+                              <ShoppingBag size={10} color="#081A18" strokeWidth={2.5} /> Misc
+                            </span>
+                          ) : (
+                            <span style={{ backgroundColor: '#3B82F6', color: '#FFFFFF', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3, boxShadow: '0 2px 6px rgba(59,130,246,0.3)' }}>
+                              <Lock size={10} color="#FFFFFF" strokeWidth={2.5} /> Fixed
                             </span>
                           )}
                         </div>
@@ -1223,8 +1255,8 @@ function BudgetsScreen({
       {/* Top Header */}
       <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => onNav('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={22} color={theme.text} />
+          <button onClick={() => onNav('home')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
           </button>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: theme.text }}>Monthly Budget</h1>
         </div>
@@ -1291,10 +1323,10 @@ function BudgetsScreen({
               <div
                 key={b.id}
                 style={{
-                  backgroundColor: isSelected ? 'rgba(44,199,167,0.12)' : theme.surface,
-                  borderRadius: 14,
+                  backgroundColor: isSelected ? (theme.mode === 'dark' ? '#102826' : '#E6F7F3') : theme.surface,
+                  borderRadius: 4,
                   padding: '16px',
-                  border: `2px solid ${isSelected ? EMERALD : theme.border}`,
+                  border: `1px solid ${theme.border}`,
                   boxShadow: isSelected ? '0 4px 16px rgba(44,199,167,0.2)' : theme.mode === 'light' ? '0 2px 10px rgba(0,0,0,0.04)' : 'none',
                   transition: 'all 0.2s',
                 }}
@@ -1304,8 +1336,8 @@ function BudgetsScreen({
                     onClick={handleBudgetClick}
                     style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                   >
-                    <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: isSelected ? EMERALD : 'rgba(44,199,167,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${EMERALD}40` }}>
-                      <BIcon size={20} color={isSelected ? '#081A18' : EMERALD} />
+                    <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: b.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 10px ${(b.color || EMERALD)}40` }}>
+                      <BIcon size={20} color="#FFFFFF" strokeWidth={2} />
                     </div>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1320,12 +1352,12 @@ function BudgetsScreen({
                     </div>
                   </button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <button onClick={() => onEditBudget(b)} style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                      <Edit3 size={13} color={theme.textSec} />
+                    <button onClick={() => onEditBudget(b)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: EMERALD, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+                      <Edit3 size={14} color="#081A18" strokeWidth={2.5} />
                     </button>
                     {b.category !== 'All' && (
-                      <button onClick={() => onDeleteBudget(b.id)} style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: 'rgba(255,90,95,0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                        <Trash2 size={13} color={ERROR} />
+                      <button onClick={() => onDeleteBudget(b.id)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: ERROR, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(255,90,95,0.35)' }}>
+                        <Trash2 size={14} color="#FFFFFF" strokeWidth={2} />
                       </button>
                     )}
                   </div>
@@ -1382,8 +1414,8 @@ function BudgetDetailScreen({
       {/* Top Header */}
       <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={22} color={theme.text} />
+          <button onClick={onBack} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
           </button>
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{budget.name}</h1>
@@ -1393,20 +1425,21 @@ function BudgetDetailScreen({
         <button
           onClick={() => onEditBudget(budget)}
           style={{
-            backgroundColor: 'rgba(44,199,167,0.15)',
-            color: EMERALD,
-            border: `1px solid ${EMERALD}40`,
+            backgroundColor: EMERALD,
+            color: '#081A18',
+            border: 'none',
             borderRadius: 8,
-            padding: '6px 12px',
+            padding: '8px 14px',
             fontWeight: 700,
             fontSize: 12,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 6
+            gap: 6,
+            boxShadow: '0 2px 8px rgba(44,199,167,0.35)',
           }}
         >
-          <Edit3 size={13} color={EMERALD} /> Edit Settings
+          <Edit3 size={13} color="#081A18" strokeWidth={2.5} /> Edit Settings
         </button>
       </div>
 
@@ -1440,8 +1473,8 @@ function BudgetDetailScreen({
                 {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 56 }} />}
                 <button onClick={() => onSelectTx(tItem)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '12px 14px', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: `${tItem.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <tItem.icon size={16} color={tItem.color} />
+                    <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: tItem.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${(tItem.color || EMERALD)}30` }}>
+                      <tItem.icon size={16} color="#FFFFFF" strokeWidth={2} />
                     </div>
                     <div>
                       <p style={{ fontWeight: 600, fontSize: 13, color: theme.text }}>{tItem.name}</p>
@@ -1500,7 +1533,25 @@ function ManageBudgetModal({
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(4px)' }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '16px 16px 0 0', padding: '20px 20px 32px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 14px', flexShrink: 0 }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexShrink: 0 }}>
           <p style={{ fontWeight: 700, fontSize: 17, color: theme.text }}>{budget ? 'Edit Budget Settings' : 'Add New Budget'}</p>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: theme.textSec, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Cancel</button>
@@ -1607,8 +1658,8 @@ function ExpensesScreen({
       {/* Header */}
       <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => onNav('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={22} color={theme.text} />
+          <button onClick={() => onNav('home')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
           </button>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: theme.text }}>Expense Manager</h1>
         </div>
@@ -1622,7 +1673,9 @@ function ExpensesScreen({
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '14px', border: `1px solid ${theme.border}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <Lock size={14} color="#60A5FA" />
+              <div style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(59,130,246,0.35)' }}>
+                <Lock size={11} color="#FFFFFF" strokeWidth={2.5} />
+              </div>
               <p style={{ fontSize: 11, color: theme.textSec, fontWeight: 600 }}>Fixed Expenses</p>
             </div>
             <p style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{formatMoney(fixedTotal)}</p>
@@ -1630,7 +1683,9 @@ function ExpensesScreen({
           </div>
           <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '14px', border: `1px solid ${theme.border}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <ShoppingBag size={14} color={EMERALD} />
+              <div style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+                <ShoppingBag size={11} color="#081A18" strokeWidth={2.5} />
+              </div>
               <p style={{ fontSize: 11, color: theme.textSec, fontWeight: 600 }}>Miscellaneous</p>
             </div>
             <p style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{formatMoney(miscTotal)}</p>
@@ -1685,8 +1740,8 @@ function ExpensesScreen({
                       {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 56 }} />}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
                         <button onClick={() => onSelectTx(t)} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                          <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: 'rgba(96,165,250,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <Lock size={16} color="#60A5FA" />
+                          <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: t.color || '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 2px 8px ${(t.color || '#3B82F6')}30` }}>
+                            <Lock size={16} color="#FFFFFF" strokeWidth={2} />
                           </div>
                           <div style={{ flex: 1 }}>
                             <p style={{ fontWeight: 600, fontSize: 13, color: theme.text }}>{t.name}</p>
@@ -1718,14 +1773,14 @@ function ExpensesScreen({
                       {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 56 }} />}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
                         <button onClick={() => onSelectTx(t)} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                          <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: 'rgba(44,199,167,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <t.icon size={16} color={EMERALD} />
+                          <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: t.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 2px 8px ${(t.color || EMERALD)}30` }}>
+                            <t.icon size={16} color="#FFFFFF" strokeWidth={2} />
                           </div>
                           <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                               <p style={{ fontWeight: 600, fontSize: 13, color: theme.text }}>{t.name}</p>
-                              <span style={{ fontSize: 9, backgroundColor: 'rgba(44,199,167,0.15)', color: EMERALD, padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>
-                                Entered
+                              <span style={{ backgroundColor: EMERALD, color: '#081A18', fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 3, boxShadow: '0 2px 6px rgba(44,199,167,0.3)' }}>
+                                <ShoppingBag size={10} color="#081A18" strokeWidth={2.5} /> Misc
                               </span>
                             </div>
                             <p style={{ fontSize: 10, color: EMERALD, fontWeight: 600, marginTop: 2 }}>
@@ -1766,8 +1821,12 @@ function AddExpenseScreen({ onBack, onAdd }: { onBack: () => void; onAdd?: (t: O
     { label: 'Food', icon: Utensils, color: ERROR },
     { label: 'Shop', icon: ShoppingBag, color: '#F97316' },
     { label: 'Travel', icon: Car, color: '#3B82F6' },
-    { label: 'Health', icon: Dumbbell, color: SUCCESS },
+    { label: 'Utilities', icon: Zap, color: '#F59E0B' },
+    { label: 'Bills', icon: Lock, color: '#06B6D4' },
+    { label: 'Edu', icon: GraduationCap, color: '#8B5CF6' },
+    { label: 'Health', icon: Heart, color: SUCCESS },
     { label: 'Fun', icon: Film, color: '#7C6FCD' },
+    { label: 'Gifts', icon: Gift, color: '#10B981' },
     { label: 'Other', icon: DollarSign, color: '#6B7280' },
   ]
 
@@ -1801,16 +1860,17 @@ function AddExpenseScreen({ onBack, onAdd }: { onBack: () => void; onAdd?: (t: O
   }
 
   return (
-    <div style={{ backgroundColor: theme.bg, flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-          <ChevronLeft size={22} color={theme.text} />
+    <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }} className="scrollbar-thin">
+      {/* Top Header */}
+      <div style={{ padding: '14px 20px 6px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        <button onClick={onBack} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+          <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
         </button>
         <h1 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>Add Expense</h1>
       </div>
 
       {/* Entry Timezone Notice */}
-      <div style={{ padding: '0 20px', marginTop: 4 }}>
+      <div style={{ padding: '0 20px', marginTop: 4, flexShrink: 0 }}>
         <div style={{ backgroundColor: 'rgba(44,199,167,0.1)', borderRadius: 6, padding: '6px 12px', border: `1px solid ${EMERALD}30`, display: 'flex', alignItems: 'center', gap: 6 }}>
           <Clock size={13} color={EMERALD} />
           <span style={{ fontSize: 11, color: theme.text, fontWeight: 600 }}>
@@ -1819,22 +1879,23 @@ function AddExpenseScreen({ onBack, onAdd }: { onBack: () => void; onAdd?: (t: O
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0 8px' }}>
-        <p style={{ fontSize: 11, color: theme.textSec, letterSpacing: 0.5, marginBottom: 4 }}>AMOUNT ({symbol.trim()})</p>
+      {/* Amount Display */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '10px 0 6px', flexShrink: 0 }}>
+        <p style={{ fontSize: 10, color: theme.textSec, letterSpacing: 0.5, marginBottom: 2 }}>AMOUNT ({symbol.trim()})</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 24, color: EMERALD, fontWeight: 700 }}>{symbol}</span>
-          <span style={{ fontSize: 44, fontWeight: 700, letterSpacing: -2, color: theme.text }}>{amount}</span>
+          <span style={{ fontSize: 22, color: EMERALD, fontWeight: 700 }}>{symbol}</span>
+          <span style={{ fontSize: 38, fontWeight: 700, letterSpacing: -1.5, color: theme.text }}>{amount}</span>
         </div>
       </div>
 
-      {/* Expense Type Toggle: Fixed vs Miscellaneous */}
-      <div style={{ padding: '0 20px', marginBottom: 12 }}>
-        <p style={{ fontSize: 10, color: theme.textSec, letterSpacing: 0.5, marginBottom: 6, fontWeight: 700 }}>EXPENSE TYPE</p>
+      {/* Expense Type Toggle */}
+      <div style={{ padding: '0 20px', marginBottom: 10, flexShrink: 0 }}>
+        <p style={{ fontSize: 10, color: theme.textSec, letterSpacing: 0.5, marginBottom: 4, fontWeight: 700 }}>EXPENSE TYPE</p>
         <div style={{ display: 'flex', backgroundColor: theme.surface, borderRadius: 8, padding: 3, border: `1px solid ${theme.border}` }}>
           <button
             onClick={() => setExpenseType('fixed')}
             style={{
-              flex: 1, padding: '8px', borderRadius: 6, fontSize: 12, fontWeight: 700,
+              flex: 1, padding: '7px', borderRadius: 6, fontSize: 12, fontWeight: 700,
               backgroundColor: expenseType === 'fixed' ? EMERALD : 'transparent',
               color: expenseType === 'fixed' ? '#081A18' : theme.textSec,
               border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
@@ -1846,7 +1907,7 @@ function AddExpenseScreen({ onBack, onAdd }: { onBack: () => void; onAdd?: (t: O
           <button
             onClick={() => setExpenseType('miscellaneous')}
             style={{
-              flex: 1, padding: '8px', borderRadius: 6, fontSize: 12, fontWeight: 700,
+              flex: 1, padding: '7px', borderRadius: 6, fontSize: 12, fontWeight: 700,
               backgroundColor: expenseType === 'miscellaneous' ? EMERALD : 'transparent',
               color: expenseType === 'miscellaneous' ? '#081A18' : theme.textSec,
               border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
@@ -1858,34 +1919,42 @@ function AddExpenseScreen({ onBack, onAdd }: { onBack: () => void; onAdd?: (t: O
         </div>
       </div>
 
-      <div style={{ padding: '0 20px', marginBottom: 12 }}>
-        <p style={{ fontSize: 10, color: theme.textSec, letterSpacing: 0.5, marginBottom: 6, fontWeight: 700 }}>CATEGORY</p>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-          {cats.map(c => (
-            <button key={c.label} onClick={() => setCategory(c.label)} style={{ flex: 1, padding: '8px 4px', borderRadius: 8, border: `1px solid ${category === c.label ? `${c.color}44` : theme.border}`, cursor: 'pointer', backgroundColor: category === c.label ? `${c.color}15` : theme.surface, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, transition: 'all 0.2s' }}>
-              <c.icon size={16} color={category === c.label ? c.color : theme.textSec} strokeWidth={1.5} />
-              <span style={{ fontSize: 9, color: category === c.label ? c.color : theme.textSec, fontWeight: 600 }}>{c.label}</span>
-            </button>
-          ))}
+      {/* Category Selector */}
+      <div style={{ padding: '0 20px', marginBottom: 10, flexShrink: 0 }}>
+        <p style={{ fontSize: 10, color: theme.textSec, letterSpacing: 0.5, marginBottom: 4, fontWeight: 700 }}>SELECT CATEGORY</p>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }} className="scrollbar-thin">
+          {cats.map(c => {
+            const isSelected = category === c.label
+            return (
+              <button key={c.label} onClick={() => setCategory(c.label)} style={{ padding: '6px 10px', borderRadius: 8, border: `1.5px solid ${isSelected ? c.color : theme.border}`, cursor: 'pointer', backgroundColor: isSelected ? `${c.color}18` : theme.surface, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, transition: 'all 0.2s', flexShrink: 0, minWidth: 58 }}>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', backgroundColor: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 6px ${c.color}40` }}>
+                  <c.icon size={13} color="#FFFFFF" strokeWidth={2} />
+                </div>
+                <span style={{ fontSize: 10, color: isSelected ? c.color : theme.textSec, fontWeight: isSelected ? 700 : 500, whiteSpace: 'nowrap' }}>{c.label}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      <div style={{ padding: '0 20px', marginBottom: 12 }}>
-        <div style={{ backgroundColor: theme.inputBg, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 14px', border: `1px solid ${theme.border}`, gap: 10 }}>
-          <Edit3 size={15} color={theme.textSec} />
-          <input value={note} onChange={e => setNote(e.target.value)} placeholder="Add a note..." style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 13, padding: '10px 0' }} />
+      {/* Note Input */}
+      <div style={{ padding: '0 20px', marginBottom: 10, flexShrink: 0 }}>
+        <div style={{ backgroundColor: theme.inputBg, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 12px', border: `1px solid ${theme.border}`, gap: 8 }}>
+          <Edit3 size={14} color={theme.textSec} />
+          <input value={note} onChange={e => setNote(e.target.value)} placeholder="Add a note..." style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 13, padding: '8px 0' }} />
         </div>
       </div>
 
-      <div style={{ flex: 1, backgroundColor: theme.surface, borderTop: `1px solid ${theme.border}`, padding: '14px 20px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+      {/* Keypad & Save Button */}
+      <div style={{ backgroundColor: theme.surface, borderTop: `1px solid ${theme.border}`, padding: '12px 20px 24px', flexShrink: 0, marginTop: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 10 }}>
           {['1','2','3','4','5','6','7','8','9','.','0','del'].map(k => (
-            <button key={k} onClick={() => handleNum(k)} style={{ padding: '12px', borderRadius: 8, backgroundColor: theme.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', border: 'none', fontSize: 18, fontWeight: 600, color: theme.text, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button key={k} onClick={() => handleNum(k)} style={{ padding: '10px', borderRadius: 8, backgroundColor: theme.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', border: 'none', fontSize: 17, fontWeight: 600, color: theme.text, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {k === 'del' ? 'Del' : k}
             </button>
           ))}
         </div>
-        <button onClick={handleSave} style={{ backgroundColor: EMERALD, color: '#081A18', fontWeight: 700, fontSize: 15, padding: '12px', borderRadius: 8, width: '100%', border: 'none', cursor: 'pointer', marginTop: 10, boxShadow: '0 4px 14px rgba(44,199,167,0.25)' }}>
+        <button onClick={handleSave} style={{ backgroundColor: EMERALD, color: '#081A18', fontWeight: 700, fontSize: 15, padding: '12px', borderRadius: 8, width: '100%', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(44,199,167,0.35)' }}>
           Save Expense
         </button>
       </div>
@@ -1939,25 +2008,25 @@ function AIScreen({
   return (
     <div style={{ backgroundColor: theme.bg, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ flexShrink: 0, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${theme.border}` }}>
+      <div style={{ flexShrink: 0, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${theme.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => onNav('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={22} color={theme.text} />
+          <button onClick={() => onNav('home')} style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)', flexShrink: 0 }}>
+            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
           </button>
-          <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: 'rgba(44,199,167,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sparkles size={18} color={EMERALD} fill={EMERALD} />
+          <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <Sparkles size={18} color="#081A18" fill="#081A18" />
           </div>
           <div>
-            <p style={{ fontWeight: 700, fontSize: 15, color: theme.text }}>Trackify AI Advisor</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <p style={{ fontWeight: 700, fontSize: 14, color: theme.text, margin: 0 }}>Trackify AI Advisor</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
               <div style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: SUCCESS }} />
-              <p style={{ fontSize: 11, color: theme.textSec }}>{region.flagTag} {region.name} Calendar Synced</p>
+              <p style={{ fontSize: 10, color: theme.textSec, margin: 0 }}>{region.code} · {region.name} Calendar</p>
             </div>
           </div>
         </div>
-        <button onClick={clearChat} style={{ backgroundColor: 'rgba(255,90,95,0.12)', border: `1px solid ${ERROR}40`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, color: ERROR, fontSize: 12, fontWeight: 600 }}>
-          <Trash2 size={13} color={ERROR} />
-          {t('clearChat')}
+        <button onClick={clearChat} style={{ backgroundColor: ERROR, border: 'none', borderRadius: 8, height: 34, padding: '0 12px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#FFFFFF', fontSize: 12, fontWeight: 700, boxShadow: '0 2px 8px rgba(255,90,95,0.35)', flexShrink: 0 }}>
+          <Trash2 size={14} color="#FFFFFF" strokeWidth={2} />
+          <span>{t('clearChat')}</span>
         </button>
       </div>
 
@@ -2098,14 +2167,41 @@ function AnalyticsScreen({ onNav, transactions }: { onNav: (s: Screen) => void; 
             </p>
           ) : (
             <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <div style={{ flexShrink: 0 }}>
-                <ResponsiveContainer width={120} height={120}>
-                  <RechartsPie>
-                    <Pie data={dynamicCategories} cx="50%" cy="50%" innerRadius={38} outerRadius={55} dataKey="value" paddingAngle={3}>
-                      {dynamicCategories.map((c, i) => <Cell key={i} fill={c.color} />)}
-                    </Pie>
-                  </RechartsPie>
-                </ResponsiveContainer>
+              <div style={{ flexShrink: 0, position: 'relative', width: 110, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="110" height="110" viewBox="0 0 110 110" style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+                  {(() => {
+                    const size = 110
+                    const strokeWidth = 14
+                    const radius = (size - strokeWidth) / 2
+                    const circ = 2 * Math.PI * radius
+                    let cumulativePercent = 0
+
+                    return dynamicCategories.map((c, i) => {
+                      const strokeDasharray = `${(c.value / 100) * circ} ${circ}`
+                      const strokeDashoffset = -((cumulativePercent / 100) * circ)
+                      cumulativePercent += c.value
+
+                      return (
+                        <circle
+                          key={i}
+                          cx={size / 2}
+                          cy={size / 2}
+                          r={radius}
+                          fill="none"
+                          stroke={c.color}
+                          strokeWidth={strokeWidth}
+                          strokeDasharray={strokeDasharray}
+                          strokeDashoffset={strokeDashoffset}
+                          style={{ transition: 'all 0.5s ease-in-out' }}
+                        />
+                      )
+                    })
+                  })()}
+                </svg>
+                <div style={{ position: 'absolute', textAlign: 'center' }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: theme.text }}>100%</span>
+                  <span style={{ fontSize: 8, color: theme.textSec, display: 'block' }}>Spent</span>
+                </div>
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {dynamicCategories.map(c => (
@@ -2147,8 +2243,8 @@ function NotificationsScreen({
       {/* Header */}
       <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={22} color={theme.text} />
+          <button onClick={onBack} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
           </button>
           <h1 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>Notifications</h1>
         </div>
@@ -2158,20 +2254,21 @@ function NotificationsScreen({
             <button
               onClick={onClearAll}
               style={{
-                backgroundColor: 'rgba(255,90,95,0.12)',
-                border: `1px solid ${ERROR}40`,
-                borderRadius: 6,
-                padding: '6px 10px',
+                backgroundColor: ERROR,
+                border: 'none',
+                borderRadius: 8,
+                padding: '6px 12px',
                 cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 4,
-                color: ERROR,
+                color: '#FFFFFF',
                 fontSize: 11,
                 fontWeight: 700,
+                boxShadow: '0 2px 8px rgba(255,90,95,0.35)',
               }}
             >
-              <Trash2 size={12} color={ERROR} /> Clear All
+              <Trash2 size={12} color="#FFFFFF" strokeWidth={2} /> Clear All
             </button>
           )}
         </div>
@@ -2192,8 +2289,8 @@ function NotificationsScreen({
             return (
               <div key={n.id} style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '14px 16px', border: `1px solid ${n.read ? theme.border : `${color}30`}`, opacity: n.read ? 0.85 : 1, boxShadow: theme.mode === 'light' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <NIcon size={16} color={color} />
+                  <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 2px 8px ${color}35` }}>
+                    <NIcon size={16} color="#FFFFFF" strokeWidth={2} />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -2237,7 +2334,25 @@ function SecurityModal({ onClose, theme }: { onClose: () => void; theme: Theme }
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '12px 12px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 16px' }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <p style={{ fontWeight: 700, fontSize: 17, color: theme.text }}>Security & PIN</p>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: theme.textSec, cursor: 'pointer', fontSize: 13 }}>Cancel</button>
@@ -2257,7 +2372,25 @@ function CurrencyModal({ onClose, selectedRegion, onSelectRegion, theme }: { onC
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '12px 12px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 16px', flexShrink: 0 }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexShrink: 0 }}>
           <div>
             <p style={{ fontWeight: 700, fontSize: 17, color: theme.text }}>Currency & Region</p>
@@ -2301,7 +2434,25 @@ function LanguageModal({ onClose, selected, onSelect, theme }: { onClose: () => 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '12px 12px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 16px' }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <p style={{ fontWeight: 700, fontSize: 17, color: theme.text }}>Language Selection</p>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: theme.textSec, cursor: 'pointer', fontSize: 13 }}>Done</button>
@@ -2359,9 +2510,27 @@ function CalculatorModal({ onClose, theme }: { onClose: () => void; theme: Theme
 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}>
-      <div style={{ backgroundColor: theme.surface, borderRadius: '12px 12px 0 0', padding: '20px 20px 32px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 14px' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+      <div style={{ backgroundColor: theme.surface, borderRadius: '16px 16px 0 0', padding: '16px 20px 24px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none', maxHeight: '85vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '0 0 8px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Calculator size={18} color={EMERALD} />
             <p style={{ fontWeight: 700, fontSize: 16, color: theme.text }}>Expense Calculator</p>
@@ -2370,20 +2539,34 @@ function CalculatorModal({ onClose, theme }: { onClose: () => void; theme: Theme
         </div>
 
         {/* Display */}
-        <div style={{ backgroundColor: theme.inputBg, borderRadius: 8, padding: '12px 16px', textAlign: 'right', marginBottom: 14, border: `1px solid ${theme.border}` }}>
+        <div style={{ backgroundColor: theme.inputBg, borderRadius: 8, padding: '10px 14px', textAlign: 'right', marginBottom: 12, border: `1px solid ${theme.border}`, flexShrink: 0 }}>
           <p style={{ fontSize: 11, color: theme.textSec, minHeight: 14 }}>{expr || '0'}</p>
-          <p style={{ fontSize: 26, fontWeight: 700, color: theme.text, marginTop: 2 }}>{display}</p>
+          <p style={{ fontSize: 24, fontWeight: 700, color: theme.text, marginTop: 2 }}>{display}</p>
         </div>
 
         {/* Keypad */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
           {buttons.map((row, rIdx) => (
             <div key={rIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {row.map(btn => {
                 const isOp = ['+', '-', '×', '÷', '='].includes(btn)
                 const isC = btn === 'C'
                 return (
-                  <button key={btn} onClick={() => handlePress(btn)} style={{ padding: '14px 0', borderRadius: 8, border: `1px solid ${isOp ? EMERALD : theme.border}`, backgroundColor: isOp ? EMERALD : isC ? 'rgba(255,90,95,0.15)' : theme.surface2, color: isOp ? '#081A18' : isC ? ERROR : theme.text, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
+                  <button
+                    key={btn}
+                    onClick={() => handlePress(btn)}
+                    style={{
+                      padding: '11px 0',
+                      borderRadius: 8,
+                      border: 'none',
+                      backgroundColor: isOp ? EMERALD : isC ? ERROR : theme.surface2,
+                      color: isOp ? '#081A18' : isC ? '#FFFFFF' : theme.text,
+                      fontWeight: 700,
+                      fontSize: 16,
+                      cursor: 'pointer',
+                      boxShadow: isOp ? '0 2px 8px rgba(44,199,167,0.35)' : isC ? '0 2px 8px rgba(255,90,95,0.35)' : 'none',
+                    }}
+                  >
                     {btn}
                   </button>
                 )
@@ -2416,7 +2599,25 @@ function NotesModal({ onClose, theme }: { onClose: () => void; theme: Theme }) {
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '12px 12px 0 0', padding: '20px 20px 32px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 14px', flexShrink: 0 }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <FileText size={18} color={EMERALD} />
@@ -2467,7 +2668,25 @@ function ShareNotebookModal({ onClose, theme }: { onClose: () => void; theme: Th
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '12px 12px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 16px' }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Share2 size={18} color={EMERALD} />
@@ -2498,7 +2717,25 @@ function ResetConfirmModal({ onClose, onConfirm, theme }: { onClose: () => void;
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '12px 12px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 20px' }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ width: 56, height: 56, borderRadius: 12, backgroundColor: 'rgba(255,90,95,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', border: `1px solid ${ERROR}40` }}>
           <AlertTriangle size={28} color={ERROR} />
         </div>
@@ -2536,11 +2773,29 @@ function TransactionDetailModal({
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(4px)' }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '16px 16px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 16px' }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: `${transaction.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <transaction.icon size={18} color={transaction.color} />
+            <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: transaction.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 10px ${(transaction.color || EMERALD)}40` }}>
+              <transaction.icon size={18} color="#FFFFFF" strokeWidth={2} />
             </div>
             <div>
               <h3 style={{ fontWeight: 700, fontSize: 16, color: theme.text }}>{transaction.name}</h3>
@@ -2639,7 +2894,25 @@ function RegionalCalendarModal({
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(4px)' }}>
       <div style={{ backgroundColor: theme.surface, borderRadius: '16px 16px 0 0', padding: '20px 20px 32px', width: '100%', maxWidth: 390, border: `1px solid ${theme.border}`, borderBottom: 'none', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: theme.border, margin: '0 auto 14px', flexShrink: 0 }} />
+        <button
+          onClick={onClose}
+          aria-label="Slide down to close"
+          title="Press to slide down"
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            padding: '2px 0 10px',
+            margin: '0 auto',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: EMERALD, opacity: 0.85, boxShadow: '0 2px 6px rgba(44,199,167,0.4)' }} />
+        </button>
         
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0 }}>
@@ -2756,8 +3029,8 @@ function RegionalCalendarModal({
               {selectedDayTx.map(tx => (
                 <div key={tx.id} style={{ backgroundColor: theme.inputBg, borderRadius: 8, padding: '10px 12px', border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: `${tx.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <tx.icon size={14} color={tx.color} />
+                    <div style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: tx.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 6px ${(tx.color || EMERALD)}30` }}>
+                      <tx.icon size={14} color="#FFFFFF" strokeWidth={2} />
                     </div>
                     <div>
                       <p style={{ fontSize: 12, fontWeight: 600, color: theme.text }}>{tx.name}</p>
@@ -2777,11 +3050,91 @@ function RegionalCalendarModal({
   )
 }
 
+function EditProfileModal({
+  onClose,
+  theme,
+  userName,
+  userEmail,
+  onSave,
+}: {
+  onClose: () => void
+  theme: Theme
+  userName: string
+  userEmail: string
+  onSave: (name: string) => void
+}) {
+  const [name, setName] = useState(userName)
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (name.trim()) {
+      onSave(name.trim())
+      onClose()
+    }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(4px)', padding: '0 20px' }}>
+      <div style={{ backgroundColor: theme.surface, borderRadius: 16, padding: '24px', width: '100%', maxWidth: 360, border: `1px solid ${theme.border}`, boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(44,199,167,0.35)' }}>
+              <User size={20} color="#081A18" strokeWidth={2.5} />
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>Edit Name & Profile</h3>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: theme.textSec, cursor: 'pointer', padding: 4 }}>
+            <X size={18} color={theme.textSec} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: theme.textSec, letterSpacing: 0.5, display: 'block', marginBottom: 6 }}>YOUR DISPLAY NAME</label>
+            <div style={{ backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 10 }}>
+              <User size={16} color={EMERALD} />
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Enter your full name"
+                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.text, fontSize: 14, padding: '12px 0', fontWeight: 600 }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: theme.textSec, letterSpacing: 0.5, display: 'block', marginBottom: 6 }}>REGISTERED SIGN-UP EMAIL</label>
+            <div style={{ backgroundColor: theme.inputBg, border: `1px solid ${theme.border}`, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 10, opacity: 0.85 }}>
+              <Mail size={16} color={theme.textSec} />
+              <input
+                type="email"
+                value={userEmail}
+                readOnly
+                disabled
+                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: theme.textSec, fontSize: 13, padding: '12px 0', cursor: 'not-allowed' }}
+              />
+              <span style={{ fontSize: 9, fontWeight: 700, backgroundColor: 'rgba(44,199,167,0.15)', color: EMERALD, padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>Sign-up Email</span>
+            </div>
+            <p style={{ fontSize: 10, color: theme.textSec, marginTop: 4 }}>This email is linked to your initial account registration.</p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: 8, border: `1px solid ${theme.border}`, backgroundColor: 'transparent', color: theme.text, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: 8, border: 'none', backgroundColor: EMERALD, color: '#081A18', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 12px rgba(44,199,167,0.25)' }}>Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function ProfileScreen({ onNav, onOpenModal, monthlyBudgetLimit, transactions }: { onNav: (s: Screen) => void; onOpenModal: (m: string) => void; monthlyBudgetLimit: number; transactions: Transaction[] }) {
-  const { theme, isDark, toggleTheme, t, formatMoney, region } = useApp()
+  const { theme, isDark, toggleTheme, t, formatMoney, region, userName, userEmail } = useApp()
   const totalExpenses = transactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
 
   const menuItems = [
+    { icon: Edit3, label: "Edit Profile Name", action: () => onOpenModal('edit-profile'), color: EMERALD },
     { icon: Calendar, label: "Regional Calendar & Clock", action: () => onOpenModal('calendar'), color: EMERALD },
     { icon: Shield, label: t('security'), action: () => onOpenModal('security'), color: theme.textSec },
     { icon: Globe, label: `${t('currencyRegion')} (${region.name})`, action: () => onOpenModal('currency'), color: theme.textSec },
@@ -2796,33 +3149,54 @@ function ProfileScreen({ onNav, onOpenModal, monthlyBudgetLimit, transactions }:
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
       <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => onNav('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={22} color={theme.text} />
+          <button onClick={() => onNav('home')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
           </button>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: theme.text }}>{t('profile')}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={toggleTheme} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: theme.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${theme.border}`, cursor: 'pointer' }}>
-            {isDark ? <Sun size={16} color={WARNING} fill={WARNING} /> : <Moon size={16} color={theme.textSec} fill={theme.textSec} />}
+          <button onClick={toggleTheme} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: isDark ? WARNING : EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: `0 2px 6px ${(isDark ? WARNING : EMERALD)}35` }}>
+            {isDark ? <Sun size={16} color="#081A18" fill="#081A18" /> : <Moon size={16} color="#081A18" fill="#081A18" />}
           </button>
-          <button onClick={() => onNav('settings')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: theme.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${theme.border}`, cursor: 'pointer' }}>
-            <Settings size={16} color={theme.textSec} fill={theme.textSec} />
+          <button onClick={() => onNav('settings')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+            <Settings size={16} color="#081A18" strokeWidth={2} />
           </button>
         </div>
       </div>
       <div style={{ padding: '0 20px', marginTop: 16 }}>
         <div style={{ backgroundColor: CARD_DARK_SOLID, borderRadius: 10, padding: '20px', boxShadow: '0 8px 24px rgba(8,26,24,0.15)', border: '1px solid rgba(44,199,167,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.3)' }}>
-              <span style={{ fontSize: 24, fontWeight: 700, color: '#081A18' }}>AJ</span>
-            </div>
-            <div>
-              <p style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF' }}>Alex Johnson</p>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>alex@example.com</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                <span style={{ fontSize: 11, color: EMERALD, fontWeight: 700 }}>{region.flagTag} {region.name} Region</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 12px rgba(44,199,167,0.4)' }}>
+                <span style={{ fontSize: 24, fontWeight: 700, color: '#081A18' }}>{getInitials(userName)}</span>
+              </div>
+              <div>
+                <p style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF' }}>{userName}</p>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{userEmail}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  <span style={{ fontSize: 11, color: EMERALD, fontWeight: 700 }}>{region.flagTag} {region.name} Region</span>
+                </div>
               </div>
             </div>
+            <button
+              onClick={() => onOpenModal('edit-profile')}
+              style={{
+                backgroundColor: EMERALD,
+                border: 'none',
+                borderRadius: 8,
+                padding: '8px 14px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                color: '#081A18',
+                fontSize: 12,
+                fontWeight: 700,
+                boxShadow: '0 3px 10px rgba(44,199,167,0.35)',
+              }}
+            >
+              <Edit3 size={14} color="#081A18" strokeWidth={2.5} /> Edit
+            </button>
           </div>
           <div style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.12)', margin: '16px 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
@@ -2841,8 +3215,8 @@ function ProfileScreen({ onNav, onOpenModal, monthlyBudgetLimit, transactions }:
             <div key={item.label}>
               {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 58 }} />}
               <button onClick={item.action} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer' }}>
-                <div style={{ width: 34, height: 34, borderRadius: 6, backgroundColor: item.color === ERROR ? 'rgba(255,90,95,0.1)' : theme.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <item.icon size={16} color={item.color} strokeWidth={1.5} />
+                <div style={{ width: 34, height: 34, borderRadius: 6, backgroundColor: item.color === ERROR ? ERROR : item.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 6px ${(item.color === ERROR ? ERROR : item.color || EMERALD)}35` }}>
+                  <item.icon size={16} color="#FFFFFF" strokeWidth={2} />
                 </div>
                 <span style={{ flex: 1, textAlign: 'left', fontSize: 14, fontWeight: 500, color: item.color === ERROR ? ERROR : theme.text }}>{item.label}</span>
                 {item.color !== ERROR && <ChevronRight size={16} color={theme.textSec} />}
@@ -2856,7 +3230,7 @@ function ProfileScreen({ onNav, onOpenModal, monthlyBudgetLimit, transactions }:
 }
 
 function SettingsScreen({ onBack, isDark, toggleTheme, onOpenModal, onNav }: { onBack: () => void; isDark: boolean; toggleTheme: () => void; onOpenModal: (m: string) => void; onNav: (s: Screen) => void }) {
-  const { theme, t, region } = useApp()
+  const { theme, t, region, userName, userEmail } = useApp()
   const [biometric, setBiometric] = useState(true)
   const [pushNotifs, setPushNotifs] = useState(true)
 
@@ -2869,6 +3243,12 @@ function SettingsScreen({ onBack, isDark, toggleTheme, onOpenModal, onNav }: { o
   }
 
   const groups = [
+    {
+      title: 'Account & Profile', items: [
+        { label: `Name: ${userName}`, icon: User, toggle: false, value: false, onToggle: () => onOpenModal('edit-profile') },
+        { label: `Sign-up Email: ${userEmail}`, icon: Mail, toggle: false, value: false, onToggle: () => onOpenModal('edit-profile') },
+      ]
+    },
     {
       title: 'Regional Time & Calendar', items: [
         { label: `Active Region: ${region.flagTag} ${region.name}`, icon: Calendar, toggle: false, value: false, onToggle: () => onOpenModal('calendar') },
@@ -2905,8 +3285,8 @@ function SettingsScreen({ onBack, isDark, toggleTheme, onOpenModal, onNav }: { o
   return (
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
       <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-          <ChevronLeft size={22} color={theme.text} />
+        <button onClick={onBack} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+          <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
         </button>
         <h1 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{t('settings')}</h1>
       </div>
@@ -2917,8 +3297,8 @@ function SettingsScreen({ onBack, isDark, toggleTheme, onOpenModal, onNav }: { o
           <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '16px', border: `1px solid ${theme.border}`, boxShadow: theme.mode === 'light' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 6, backgroundColor: isDark ? 'rgba(246,195,67,0.15)' : 'rgba(44,199,167,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {isDark ? <Moon size={17} color={WARNING} fill={WARNING} /> : <Sun size={17} color={EMERALD} fill={EMERALD} />}
+                <div style={{ width: 34, height: 34, borderRadius: 6, backgroundColor: isDark ? WARNING : EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 6px ${(isDark ? WARNING : EMERALD)}35` }}>
+                  {isDark ? <Moon size={17} color="#081A18" fill="#081A18" /> : <Sun size={17} color="#081A18" fill="#081A18" />}
                 </div>
                 <div>
                   <p style={{ fontWeight: 600, fontSize: 14, color: theme.text }}>{t('nightMode')}</p>
@@ -2949,8 +3329,8 @@ function SettingsScreen({ onBack, isDark, toggleTheme, onOpenModal, onNav }: { o
                 <div key={item.label}>
                   {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 54 }} />}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: theme.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <item.icon size={15} color={theme.textSec} strokeWidth={1.5} />
+                    <div style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
+                      <item.icon size={15} color="#081A18" strokeWidth={2} />
                     </div>
                     <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: theme.text }}>{item.label}</span>
                     {item.toggle ? <Toggle value={item.value} onToggle={item.onToggle} /> : (
@@ -3002,6 +3382,8 @@ function SettingsScreen({ onBack, isDark, toggleTheme, onOpenModal, onNav }: { o
 
 export default function App() {
   const [hasLoggedIn, setHasLoggedIn] = useState(() => localStorage.getItem('trackify_logged_in') === 'true')
+  const [userName, setUserName] = useState(() => localStorage.getItem('trackify_user_name') || 'Alex Johnson')
+  const [userEmail, setUserEmail] = useState(() => localStorage.getItem('trackify_user_email') || 'alex@example.com')
   const [isDark, setIsDark] = useState(false)
   const [screen, setScreen] = useState<Screen>(() => hasLoggedIn ? 'home' : 'splash')
   const [budgets, setBudgets] = useState<Budget[]>(defaultBudgets)
@@ -3015,6 +3397,16 @@ export default function App() {
   const [lang, setLang] = useState<Language>('en')
   const [toastMsg, setToastMsg] = useState<string | null>(null)
   const [selectedTxDetail, setSelectedTxDetail] = useState<Transaction | null>(null)
+
+  const handleUpdateUserName = (name: string) => {
+    setUserName(name)
+    localStorage.setItem('trackify_user_name', name)
+  }
+
+  const handleUpdateUserEmail = (email: string) => {
+    setUserEmail(email)
+    localStorage.setItem('trackify_user_email', email)
+  }
 
   const region = REGIONS[regionCode] || REGIONS.PK
   const [regionalTime, setRegionalTime] = useState(() => getRegionalTimeInfo(region.timezone))
@@ -3138,9 +3530,11 @@ export default function App() {
     setTimeout(() => setToastMsg(null), 3000)
   }
 
-  const handleSignIn = () => {
+  const handleSignIn = (emailInput?: string, nameInput?: string) => {
     localStorage.setItem('trackify_logged_in', 'true')
     setHasLoggedIn(true)
+    if (emailInput) handleUpdateUserEmail(emailInput)
+    if (nameInput) handleUpdateUserName(nameInput)
     setTransactions(initTransactions)
     setNotificationsList(initNotifications)
     setBudgets(defaultBudgets)
@@ -3213,7 +3607,11 @@ export default function App() {
       lang,
       setLang,
       t,
-      formatMoney
+      formatMoney,
+      userName,
+      userEmail,
+      setUserName: handleUpdateUserName,
+      setUserEmail: handleUpdateUserEmail,
     }}>
       {/* Full page background */}
       <div style={{
@@ -3360,6 +3758,19 @@ export default function App() {
                     theme={theme}
                   />
                 )}
+                {activeModal === 'edit-profile' && (
+                  <EditProfileModal
+                    onClose={() => setActiveModal(null)}
+                    theme={theme}
+                    userName={userName}
+                    userEmail={userEmail}
+                    onSave={(newVal) => {
+                      handleUpdateUserName(newVal)
+                      setToastMsg(`Name updated to "${newVal}"`)
+                      setTimeout(() => setToastMsg(null), 3000)
+                    }}
+                  />
+                )}
                 {selectedTxDetail && (
                   <TransactionDetailModal
                     transaction={selectedTxDetail}
@@ -3378,25 +3789,6 @@ export default function App() {
 
                 {/* Bottom Nav */}
                 {showNav && <BottomNav active={screen} onChange={setScreen} />}
-
-                {/* Home Indicator */}
-                <div style={{
-                  height: 24,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justify: 'center',
-                  paddingBottom: 6,
-                  backgroundColor: showNav
-                    ? (theme.mode === 'dark' ? 'rgba(16,40,38,0.95)' : 'rgba(255,255,255,0.95)')
-                    : theme.bg,
-                }}>
-                  <div style={{
-                    width: 134,
-                    height: 5,
-                    borderRadius: 3,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.18)',
-                  }} />
-                </div>
               </div>
             </div>
           </div>
