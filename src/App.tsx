@@ -677,27 +677,59 @@ function BottomNav({ active, onChange }: { active: string; onChange: (s: Screen)
   ]
   return (
     <div style={{
-      backgroundColor: theme.mode === 'dark' ? '#0D211F' : '#FFFFFF',
+      backgroundColor: theme.mode === 'dark' ? 'rgba(13, 33, 31, 0.94)' : 'rgba(255, 255, 255, 0.94)',
+      backdropFilter: 'blur(12px)',
       borderTop: `1px solid ${theme.border}`,
-    }} className="flex items-center px-2 py-2">
+      boxShadow: theme.mode === 'light' ? '0 -4px 20px rgba(0,0,0,0.03)' : 'none',
+    }} className="flex items-center px-3 py-2">
       {items.map(item => {
         const isActive = item.id === active
         if (item.fab) return (
           <button key={item.id} onClick={() => onChange(item.id as Screen)}
             className="flex-1 flex flex-col items-center gap-1 py-1" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            <div style={{ width: 42, height: 42, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(44,199,167,0.35)' }}>
-              <Plus size={20} color="#081A18" strokeWidth={2.5} />
+            <div style={{
+              width: 48,
+              height: 48,
+              borderRadius: 99,
+              backgroundColor: EMERALD,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 20px rgba(44, 199, 167, 0.4)',
+              transform: 'translateY(-10px)',
+              border: `3px solid ${theme.mode === 'dark' ? '#0D211F' : '#FFFFFF'}`,
+              transition: 'transform 0.2s ease',
+            }}>
+              <Plus size={22} color="#081A18" strokeWidth={2.5} />
             </div>
-            <span style={{ fontSize: 10, color: theme.textSec }}>Add</span>
+            <span style={{ fontSize: 10, color: theme.textSec, fontWeight: 600, marginTop: -8 }}>Add</span>
           </button>
         )
         return (
           <button key={item.id} onClick={() => onChange(item.id as Screen)}
             className="flex-1 flex flex-col items-center gap-1 py-1" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            <div style={{ padding: '6px', borderRadius: 6, backgroundColor: isActive ? 'rgba(44,199,167,0.12)' : 'transparent', transition: 'background-color 0.2s' }}>
-              <item.icon size={20} color={isActive ? EMERALD : theme.textSec} fill={isActive ? EMERALD : theme.textSec} strokeWidth={isActive ? 2 : 1.5} />
+            <div style={{
+              padding: '6px 14px',
+              borderRadius: 20,
+              backgroundColor: isActive
+                ? (theme.mode === 'light' ? 'rgba(44, 199, 167, 0.14)' : 'rgba(44, 199, 167, 0.18)')
+                : 'transparent',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <item.icon
+                size={19}
+                color={isActive ? (theme.mode === 'light' ? '#147A6A' : '#45E5C7') : theme.textSec}
+                strokeWidth={isActive ? 2.2 : 1.8}
+              />
             </div>
-            <span style={{ fontSize: 10, color: isActive ? EMERALD : theme.textSec, fontWeight: isActive ? 600 : 400 }}>{item.label}</span>
+            <span style={{
+              fontSize: 10,
+              color: isActive ? (theme.mode === 'light' ? '#147A6A' : '#45E5C7') : theme.textSec,
+              fontWeight: isActive ? 700 : 500
+            }}>{item.label}</span>
           </button>
         )
       })}
@@ -903,10 +935,15 @@ function TrackifyGreenBudgetCard({
   onTapCard?: () => void
   formatMoney: (amt: number) => string
 }) {
+  const { theme } = useApp()
   const MainIcon = getBudgetIcon(mainIconName)
   const totalRemaining = Math.max(0, totalBudget - totalSpent)
   const usedPct = totalBudget > 0 ? Math.min(Math.round((totalSpent / totalBudget) * 100), 100) : 0
   const remainingPct = 100 - usedPct
+
+  const cardGradient = theme.mode === 'light'
+    ? 'linear-gradient(135deg, #1C8574 0%, #28B097 50%, #3AD4B7 100%)'
+    : 'linear-gradient(135deg, #124B42 0%, #1A6256 50%, #217769 100%)'
 
   return (
     <button
@@ -922,79 +959,125 @@ function TrackifyGreenBudgetCard({
       }}
     >
       <div style={{
-        backgroundColor: '#165B51',
-        borderRadius: 4,
+        background: cardGradient,
+        borderRadius: 20,
         padding: '24px 20px',
-        boxShadow: '0 8px 24px rgba(22, 91, 81, 0.45)',
+        boxShadow: theme.mode === 'light'
+          ? '0 12px 32px -6px rgba(27, 120, 104, 0.28)'
+          : '0 12px 32px -6px rgba(0, 0, 0, 0.45)',
         color: '#FFFFFF',
         position: 'relative',
         overflow: 'hidden',
-        border: 'none',
+        border: '1px solid rgba(255, 255, 255, 0.25)',
       }}>
+        {/* Soft Natural Background Radial Glows */}
+        <div style={{
+          position: 'absolute',
+          top: -40,
+          right: -40,
+          width: 160,
+          height: 160,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: -50,
+          left: -30,
+          width: 140,
+          height: 140,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 70%)',
+          pointerEvents: 'none',
+        }} />
+
         {/* Card Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(44, 199, 167, 0.4)' }}>
-            <MainIcon size={22} color="#081A18" strokeWidth={2.5} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, position: 'relative', zIndex: 1 }}>
+          <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: 14,
+            backgroundColor: 'rgba(255, 255, 255, 0.22)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          }}>
+            <MainIcon size={22} color="#FFFFFF" strokeWidth={2.2} />
           </div>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{budgetName}</h2>
-            <p style={{ fontSize: 12, color: EMERALD, margin: 0, marginTop: 2, fontWeight: 600 }}>{subText}</p>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', margin: 0, letterSpacing: -0.3 }}>{budgetName}</h2>
+            <p style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.88)', margin: 0, marginTop: 2, fontWeight: 600 }}>{subText}</p>
           </div>
         </div>
 
         {/* Total Budget */}
-        <div style={{ marginBottom: 20 }}>
-          <p style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.8)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Total Budget Limit</p>
-          <p style={{ fontSize: 34, fontWeight: 800, color: '#FFFFFF', margin: 0, marginTop: 4, letterSpacing: -0.5 }}>
+        <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
+          <p style={{ fontSize: 11, color: 'rgba(255, 255, 255, 0.78)', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6 }}>Total Budget Limit</p>
+          <p style={{ fontSize: 34, fontWeight: 800, color: '#FFFFFF', margin: 0, marginTop: 4, letterSpacing: -0.6 }}>
             {formatMoney(totalBudget)}
           </p>
         </div>
 
         {/* Progress Bar & Sub-labels */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ height: 8, backgroundColor: 'rgba(255, 255, 255, 0.15)', borderRadius: 2, overflow: 'hidden', marginBottom: 8, border: 'none' }}>
-            <div style={{ height: '100%', width: `${usedPct}%`, backgroundColor: usedPct > 85 ? ERROR : EMERALD, borderRadius: 2, transition: 'width 0.6s ease', boxShadow: '0 0 10px rgba(44, 199, 167, 0.6)' }} />
+        <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
+          <div style={{ height: 8, backgroundColor: 'rgba(255, 255, 255, 0.2)', borderRadius: 99, overflow: 'hidden', marginBottom: 8, border: 'none' }}>
+            <div style={{
+              height: '100%',
+              width: `${usedPct}%`,
+              backgroundColor: usedPct > 85 ? '#FF6B6B' : '#52F0CB',
+              borderRadius: 99,
+              transition: 'width 0.6s ease',
+              boxShadow: usedPct > 85 ? '0 0 12px rgba(255, 107, 107, 0.6)' : '0 0 12px rgba(82, 240, 203, 0.6)',
+            }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600 }}>
-            <span style={{ color: usedPct > 85 ? ERROR : EMERALD }}>{usedPct}% used</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255, 255, 255, 0.92)', fontWeight: 600 }}>
+            <span style={{ color: usedPct > 85 ? '#FF8A8A' : '#72F9DB' }}>{usedPct}% used</span>
             <span style={{ color: 'rgba(255, 255, 255, 0.85)' }}>{remainingPct}% remaining</span>
           </div>
         </div>
 
-        {/* Two Trackify Solid Stat Cards (Spent & Remaining) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        {/* Two Glassmorphic Stat Cards (Spent & Remaining) */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, position: 'relative', zIndex: 1 }}>
           {/* Spent Card */}
           <div style={{
-            backgroundColor: '#081A18',
-            borderRadius: 4,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 14,
             padding: '14px 16px',
-            border: 'none',
+            border: '1px solid rgba(255, 255, 255, 0.22)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <div style={{ width: 24, height: 24, borderRadius: 4, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-                <TrendingUp size={14} color="#081A18" strokeWidth={2.5} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: 'rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TrendingUp size={14} color="#FFFFFF" strokeWidth={2.2} />
               </div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF' }}>Spent</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)' }}>Spent</span>
             </div>
-            <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <p style={{ fontSize: 19, fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: -0.3 }}>
               {formatMoney(totalSpent)}
             </p>
           </div>
 
           {/* Remaining Card */}
           <div style={{
-            backgroundColor: '#081A18',
-            borderRadius: 4,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 14,
             padding: '14px 16px',
-            border: 'none',
+            border: '1px solid rgba(255, 255, 255, 0.22)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <div style={{ width: 24, height: 24, borderRadius: 4, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-                <Wallet size={14} color="#081A18" strokeWidth={2.5} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: 'rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Wallet size={14} color="#FFFFFF" strokeWidth={2.2} />
               </div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF' }}>Remaining</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)' }}>Remaining</span>
             </div>
-            <p style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <p style={{ fontSize: 19, fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: -0.3 }}>
               {formatMoney(totalRemaining)}
             </p>
           </div>
@@ -1046,29 +1129,75 @@ function HomeScreen({
   return (
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
       {/* Header */}
-      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '20px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <button onClick={() => onNav('profile')} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
-          <div style={{ width: 38, height: 38, borderRadius: 8, overflow: 'hidden', border: `2px solid rgba(44,199,167,0.3)` }}>
+          <div style={{ width: 40, height: 40, borderRadius: 14, overflow: 'hidden', border: `2px solid rgba(44,199,167,0.3)` }}>
             <div style={{ width: '100%', height: '100%', backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#081A18' }}>{getInitials(userName)}</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: '#081A18' }}>{getInitials(userName)}</span>
             </div>
           </div>
           <div>
-            <p style={{ fontSize: 11, color: theme.textSec }}>{t('goodMorning')}</p>
-            <p style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.2, color: theme.text }}>{userName}</p>
+            <p style={{ fontSize: 11, color: theme.textSec, margin: 0 }}>{t('goodMorning')}</p>
+            <p style={{ fontSize: 16, fontWeight: 800, letterSpacing: -0.3, color: theme.text, margin: 0, marginTop: 1 }}>{userName}</p>
           </div>
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={() => onOpenModal('calendar')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-            <Calendar size={18} color="#081A18" strokeWidth={2} />
+          <button
+            onClick={() => onOpenModal('calendar')}
+            title="Open Calendar"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: theme.mode === 'light' ? 'rgba(35, 181, 151, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            <Calendar size={18} color={EMERALD} strokeWidth={2.2} />
           </button>
-          <button onClick={toggleTheme} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: isDark ? WARNING : EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: `0 2px 6px ${(isDark ? WARNING : EMERALD)}35` }}>
-            {isDark ? <Sun size={16} color="#081A18" fill="#081A18" /> : <Moon size={16} color="#081A18" fill="#081A18" />}
+          <button
+            onClick={toggleTheme}
+            title="Toggle Dark/Light Mode"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: theme.mode === 'light' ? 'rgba(35, 181, 151, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            {isDark ? <Sun size={18} color={WARNING} fill={WARNING} /> : <Moon size={18} color={EMERALD} fill={EMERALD} />}
           </button>
-          <button onClick={() => onNav('notifications')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', position: 'relative', cursor: 'pointer', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-            <Bell size={16} color="#081A18" strokeWidth={2} />
+          <button
+            onClick={() => onNav('notifications')}
+            title="Notifications"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: theme.mode === 'light' ? 'rgba(35, 181, 151, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              position: 'relative',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            <Bell size={18} color={EMERALD} strokeWidth={2.2} />
             {hasNotifications && (
-              <div style={{ position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: 4, backgroundColor: ERROR, border: `1.5px solid ${theme.bg}` }} />
+              <div style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: 99, backgroundColor: ERROR, border: `1.5px solid ${theme.bg}` }} />
             )}
           </button>
         </div>
@@ -1077,10 +1206,20 @@ function HomeScreen({
       {/* Regional Time & Calendar Bar */}
       <div style={{ padding: '0 20px', marginTop: 10 }}>
         <button onClick={() => onOpenModal('calendar')} style={{ width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
-          <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '10px 14px', border: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-                <Calendar size={18} color="#081A18" strokeWidth={2} />
+          <div style={{
+            backgroundColor: theme.surface,
+            borderRadius: 16,
+            padding: '12px 16px',
+            border: `1px solid ${theme.border}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(44, 199, 167, 0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Calendar size={18} color={theme.mode === 'light' ? '#147A6A' : '#45E5C7'} strokeWidth={2.2} />
               </div>
               <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: theme.text, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1101,7 +1240,7 @@ function HomeScreen({
       </div>
 
       {/* Main Trackify Green Budget Card (Reflects Active Budget!) */}
-      <div style={{ padding: '0 20px', marginTop: 12 }}>
+      <div style={{ padding: '0 20px', marginTop: 14 }}>
         <TrackifyGreenBudgetCard
           budgetName={activeBudget.name}
           totalBudget={activeBudget.limit}
@@ -1114,8 +1253,8 @@ function HomeScreen({
       </div>
 
       {/* Quick Actions */}
-      <div style={{ padding: '0 20px', marginTop: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+      <div style={{ padding: '0 20px', marginTop: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
           {[
             { icon: Plus, label: 'Add', action: () => onNav('add-expense') },
             { icon: Target, label: 'Budgets', action: () => onNav('budgets') },
@@ -1124,31 +1263,50 @@ function HomeScreen({
             { icon: FileText, label: 'Notes', action: () => onOpenModal('notes') },
           ].map(({ icon: Icon, label, action }) => (
             <button key={label} onClick={action} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 10, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(44,199,167,0.35)' }}>
-                <Icon size={18} color="#081A18" strokeWidth={2} />
+              <div style={{
+                width: 46,
+                height: 46,
+                borderRadius: 14,
+                backgroundColor: theme.mode === 'light' ? 'rgba(44, 199, 167, 0.12)' : 'rgba(44, 199, 167, 0.18)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.2s',
+              }}>
+                <Icon size={19} color={theme.mode === 'light' ? '#147A6A' : '#45E5C7'} strokeWidth={2.2} />
               </div>
-              <span style={{ fontSize: 11, color: theme.textSec, fontWeight: 500 }}>{label}</span>
+              <span style={{ fontSize: 11, color: theme.textSec, fontWeight: 600 }}>{label}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* AI Insight / Advisor Card */}
-      <div style={{ padding: '0 20px', marginTop: 20 }}>
+      <div style={{ padding: '0 20px', marginTop: 22 }}>
         <button onClick={() => onNav('ai')} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-          <div style={{ backgroundColor: EMERALD, borderRadius: 10, padding: '16px', boxShadow: '0 4px 16px rgba(44,199,167,0.4)', border: 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#081A18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(8,26,24,0.4)' }}>
-                <Sparkles size={20} color={EMERALD} fill={EMERALD} />
+          <div style={{
+            background: theme.mode === 'light'
+              ? 'linear-gradient(135deg, #1C8574 0%, #28B097 100%)'
+              : 'linear-gradient(135deg, #144D43 0%, #1E7B6C 100%)',
+            borderRadius: 18,
+            padding: '18px',
+            boxShadow: theme.mode === 'light'
+              ? '0 8px 24px -4px rgba(27, 120, 104, 0.25)'
+              : '0 8px 24px -4px rgba(0, 0, 0, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Sparkles size={20} color="#FFFFFF" fill="#FFFFFF" />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#081A18', letterSpacing: 0.6 }}>TRACKIFY AI ADVISOR</span>
-                  <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#081A18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <ArrowRight size={14} color={EMERALD} strokeWidth={2.5} />
+                  <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255, 255, 255, 0.95)', letterSpacing: 0.8 }}>TRACKIFY AI ADVISOR</span>
+                  <div style={{ width: 24, height: 24, borderRadius: 99, backgroundColor: 'rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ArrowRight size={13} color="#FFFFFF" strokeWidth={2.5} />
                   </div>
                 </div>
-                <p style={{ fontSize: 13, marginTop: 6, lineHeight: 1.5, color: '#081A18', fontWeight: 600 }}>
+                <p style={{ fontSize: 13, marginTop: 6, lineHeight: 1.5, color: '#FFFFFF', fontWeight: 600, margin: 0 }}>
                   {transactions.length === 0 ? (
                     "No expenses recorded yet. Tap here for AI advice on tracking Fixed & Miscellaneous entry dates!"
                   ) : (
@@ -1162,18 +1320,18 @@ function HomeScreen({
       </div>
 
       {/* Recent Transactions */}
-      <div style={{ padding: '0 20px', marginTop: 20, paddingBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Clock size={16} color={EMERALD} />
-            <span style={{ fontWeight: 600, fontSize: 15, color: theme.text }}>{t('recentTransactions')}</span>
+      <div style={{ padding: '0 20px', marginTop: 24, paddingBottom: 28 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Clock size={18} color={EMERALD} strokeWidth={2.2} />
+            <span style={{ fontWeight: 800, fontSize: 16, color: theme.text, letterSpacing: -0.3 }}>{t('recentTransactions')}</span>
           </div>
           <button onClick={() => onNav('expenses')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 12, color: EMERALD }}>{t('seeAll')}</span>
-            <ChevronRight size={14} color={EMERALD} />
+            <span style={{ fontSize: 12, color: EMERALD, fontWeight: 700 }}>{t('seeAll')}</span>
+            <ChevronRight size={14} color={EMERALD} strokeWidth={2.2} />
           </button>
         </div>
-        <div style={{ backgroundColor: theme.surface, borderRadius: 8, border: `1px solid ${theme.border}`, overflow: 'hidden', boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.06)' : 'none' }}>
+        <div style={{ backgroundColor: theme.surface, borderRadius: 16, border: `1px solid ${theme.border}`, overflow: 'hidden', boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none' }}>
           {transactions.length === 0 ? (
             <p style={{ textAlign: 'center', padding: '24px 16px', fontSize: 13, color: theme.textSec }}>
               {t('noTransactions')}
@@ -1185,28 +1343,28 @@ function HomeScreen({
                 <div key={tItem.id}>
                   {i > 0 && <div style={{ height: 1, backgroundColor: theme.divider, marginLeft: 64 }} />}
                   <button onClick={() => onSelectTx(tItem)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: tItem.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 3px 10px ${(tItem.color || EMERALD)}40` }}>
-                        <tItem.icon size={18} color="#FFFFFF" strokeWidth={2} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
+                      <div style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: tItem.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 12px ${(tItem.color || EMERALD)}35` }}>
+                        <tItem.icon size={19} color="#FFFFFF" strokeWidth={2} />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <p style={{ fontWeight: 600, fontSize: 13, color: theme.text }}>{tItem.name}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <p style={{ fontWeight: 700, fontSize: 14, color: theme.text, margin: 0 }}>{tItem.name}</p>
                           {isMisc ? (
-                            <span style={{ backgroundColor: EMERALD, color: '#081A18', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3, boxShadow: '0 2px 6px rgba(44,199,167,0.3)' }}>
-                              <ShoppingBag size={10} color="#081A18" strokeWidth={2.5} /> Misc
+                            <span style={{ backgroundColor: 'rgba(44, 199, 167, 0.15)', color: theme.mode === 'light' ? '#147A6A' : '#45E5C7', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                              <ShoppingBag size={10} color={theme.mode === 'light' ? '#147A6A' : '#45E5C7'} strokeWidth={2.2} /> Misc
                             </span>
                           ) : (
-                            <span style={{ backgroundColor: '#3B82F6', color: '#FFFFFF', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3, boxShadow: '0 2px 6px rgba(59,130,246,0.3)' }}>
-                              <Lock size={10} color="#FFFFFF" strokeWidth={2.5} /> Fixed
+                            <span style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#2563EB', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                              <Lock size={10} color="#2563EB" strokeWidth={2.2} /> Fixed
                             </span>
                           )}
                         </div>
-                        <p style={{ fontSize: 10, color: theme.textSec, marginTop: 2 }}>
+                        <p style={{ fontSize: 11, color: theme.textSec, margin: 0, marginTop: 2 }}>
                           {tItem.exactEntryDateStr ? `Entered: ${tItem.exactEntryDateStr}` : tItem.date}
                         </p>
                       </div>
-                      <span style={{ fontWeight: 600, fontSize: 14, color: tItem.amount > 0 ? SUCCESS : theme.text }}>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: tItem.amount > 0 ? SUCCESS : theme.text }}>
                         {formatMoney(tItem.amount)}
                       </span>
                     </div>
@@ -1253,12 +1411,29 @@ function BudgetsScreen({
   return (
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
       {/* Top Header */}
-      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => onNav('home')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
+      <div style={{ padding: '20px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={() => onNav('home')}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: theme.mode === 'light' ? 'rgba(35, 181, 151, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            <ChevronLeft size={20} color={EMERALD} strokeWidth={2.2} />
           </button>
-          <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: theme.text }}>Monthly Budget</h1>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, color: theme.text, margin: 0 }}>Monthly Budget</h1>
+            <p style={{ fontSize: 11, color: theme.textSec, margin: 0, marginTop: 2 }}>Plan better · Spend smarter</p>
+          </div>
         </div>
         <button
           onClick={onAddBudget}
@@ -1266,17 +1441,18 @@ function BudgetsScreen({
             backgroundColor: EMERALD,
             color: '#081A18',
             border: 'none',
-            borderRadius: 8,
-            padding: '8px 14px',
+            borderRadius: 12,
+            padding: '9px 15px',
             fontWeight: 700,
             fontSize: 12,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
+            boxShadow: '0 4px 14px rgba(44, 199, 167, 0.25)',
           }}
         >
-          <Plus size={14} color="#081A18" strokeWidth={2.5} /> Add Budget
+          <Plus size={15} color="#081A18" strokeWidth={2.5} /> Add Budget
         </button>
       </div>
 
@@ -1292,19 +1468,19 @@ function BudgetsScreen({
         />
       </div>
 
-      {/* Multiple Budgets Section (Clicking any budget switches automatically!) */}
-      <div style={{ padding: '0 20px', marginTop: 24, paddingBottom: 28 }}>
+      {/* Multiple Budgets Section */}
+      <div style={{ padding: '0 20px', marginTop: 24, paddingBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
-            <p style={{ fontWeight: 700, fontSize: 16, color: theme.text }}>Active Category Budgets ({budgets.length})</p>
-            <p style={{ fontSize: 11, color: theme.textSec }}>Click any budget to switch automatically</p>
+            <p style={{ fontWeight: 800, fontSize: 16, color: theme.text, margin: 0, letterSpacing: -0.3 }}>Active Category Budgets ({budgets.length})</p>
+            <p style={{ fontSize: 11, color: theme.textSec, margin: 0, marginTop: 2 }}>Click any budget card to switch focus</p>
           </div>
           <button onClick={onAddBudget} style={{ background: 'none', border: 'none', color: EMERALD, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Plus size={14} color={EMERALD} /> New Budget
+            <Plus size={14} color={EMERALD} strokeWidth={2.2} /> New Budget
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {budgets.map(b => {
             const BIcon = getBudgetIcon(b.iconName)
             const isSelected = b.id === activeBudgetId
@@ -1323,41 +1499,73 @@ function BudgetsScreen({
               <div
                 key={b.id}
                 style={{
-                  backgroundColor: isSelected ? (theme.mode === 'dark' ? '#102826' : '#E6F7F3') : theme.surface,
-                  borderRadius: 4,
-                  padding: '16px',
-                  border: `1px solid ${theme.border}`,
-                  boxShadow: isSelected ? '0 4px 16px rgba(44,199,167,0.2)' : theme.mode === 'light' ? '0 2px 10px rgba(0,0,0,0.04)' : 'none',
-                  transition: 'all 0.2s',
+                  backgroundColor: isSelected ? (theme.mode === 'dark' ? '#0E2926' : '#F0F9F7') : theme.surface,
+                  borderRadius: 16,
+                  padding: '18px',
+                  border: isSelected ? '1.5px solid #23B597' : `1px solid ${theme.border}`,
+                  boxShadow: isSelected
+                    ? '0 8px 24px -4px rgba(35, 181, 151, 0.18)'
+                    : theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none',
+                  transition: 'all 0.25s ease',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                   <button
                     onClick={handleBudgetClick}
-                    style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                   >
-                    <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: b.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 10px ${(b.color || EMERALD)}40` }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: b.color || EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 12px ${(b.color || EMERALD)}35` }}>
                       <BIcon size={20} color="#FFFFFF" strokeWidth={2} />
                     </div>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <p style={{ fontWeight: 700, fontSize: 14, color: theme.text }}>{b.name}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <p style={{ fontWeight: 700, fontSize: 15, color: theme.text, margin: 0 }}>{b.name}</p>
                         {isSelected && (
-                          <span style={{ fontSize: 9, fontWeight: 800, backgroundColor: EMERALD, color: '#081A18', padding: '2px 6px', borderRadius: 4 }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, backgroundColor: 'rgba(44, 199, 167, 0.18)', color: theme.mode === 'light' ? '#147A6A' : '#45E5C7', padding: '3px 9px', borderRadius: 20, letterSpacing: 0.4 }}>
                             ACTIVE
                           </span>
                         )}
                       </div>
-                      <p style={{ fontSize: 11, color: theme.textSec }}>Category: {b.category}</p>
+                      <p style={{ fontSize: 11, color: theme.textSec, margin: 0, marginTop: 2 }}>Category: {b.category}</p>
                     </div>
                   </button>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <button onClick={() => onEditBudget(b)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: EMERALD, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-                      <Edit3 size={14} color="#081A18" strokeWidth={2.5} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button
+                      onClick={() => onEditBudget(b)}
+                      title="Edit Budget"
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 10,
+                        backgroundColor: theme.mode === 'light' ? 'rgba(44, 199, 167, 0.12)' : 'rgba(44, 199, 167, 0.2)',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                      }}
+                    >
+                      <Edit3 size={14} color={theme.mode === 'light' ? '#147A6A' : '#45E5C7'} strokeWidth={2.2} />
                     </button>
                     {b.category !== 'All' && (
-                      <button onClick={() => onDeleteBudget(b.id)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: ERROR, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(255,90,95,0.35)' }}>
-                        <Trash2 size={14} color="#FFFFFF" strokeWidth={2} />
+                      <button
+                        onClick={() => onDeleteBudget(b.id)}
+                        title="Delete Budget"
+                        style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: 10,
+                          backgroundColor: theme.mode === 'light' ? 'rgba(255, 90, 95, 0.12)' : 'rgba(255, 90, 95, 0.2)',
+                          border: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                        }}
+                      >
+                        <Trash2 size={14} color="#E5484D" strokeWidth={2.2} />
                       </button>
                     )}
                   </div>
@@ -1365,15 +1573,15 @@ function BudgetsScreen({
 
                 <button onClick={handleBudgetClick} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, fontSize: 12 }}>
-                    <span style={{ color: theme.textSec }}>Spent: <strong style={{ color: theme.text }}>{formatMoney(catSpent)}</strong></span>
-                    <span style={{ color: theme.textSec }}>Limit: <strong style={{ color: theme.text }}>{formatMoney(b.limit)}</strong></span>
+                    <span style={{ color: theme.textSec }}>Spent: <strong style={{ color: theme.text, fontWeight: 700 }}>{formatMoney(catSpent)}</strong></span>
+                    <span style={{ color: theme.textSec }}>Limit: <strong style={{ color: theme.text, fontWeight: 700 }}>{formatMoney(b.limit)}</strong></span>
                   </div>
 
                   <ProgressBar value={catSpent} max={b.limit || 1} color={EMERALD} height={6} theme={theme} />
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, fontSize: 11 }}>
-                    <span style={{ color: bUsedPct > 85 ? ERROR : EMERALD, fontWeight: 700 }}>{bUsedPct}% used</span>
-                    <span style={{ color: theme.textSec }}>{formatMoney(bRemaining)} left</span>
+                    <span style={{ color: bUsedPct > 85 ? ERROR : (theme.mode === 'light' ? '#147A6A' : '#45E5C7'), fontWeight: 700 }}>{bUsedPct}% used</span>
+                    <span style={{ color: theme.textSec, fontWeight: 500 }}>{formatMoney(bRemaining)} left</span>
                   </div>
                 </button>
               </div>
@@ -1412,14 +1620,28 @@ function BudgetDetailScreen({
   return (
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
       {/* Top Header */}
-      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={onBack} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
+      <div style={{ padding: '20px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={onBack}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: theme.mode === 'light' ? 'rgba(35, 181, 151, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            <ChevronLeft size={20} color={EMERALD} strokeWidth={2.2} />
           </button>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{budget.name}</h1>
-            <span style={{ fontSize: 11, color: EMERALD, fontWeight: 600 }}>Active Budget View</span>
+            <h1 style={{ fontSize: 18, fontWeight: 800, letterSpacing: -0.4, color: theme.text, margin: 0 }}>{budget.name}</h1>
+            <span style={{ fontSize: 11, color: theme.mode === 'light' ? '#147A6A' : '#45E5C7', fontWeight: 600 }}>Active Budget View</span>
           </div>
         </div>
         <button
@@ -1428,18 +1650,18 @@ function BudgetDetailScreen({
             backgroundColor: EMERALD,
             color: '#081A18',
             border: 'none',
-            borderRadius: 8,
-            padding: '8px 14px',
+            borderRadius: 12,
+            padding: '9px 15px',
             fontWeight: 700,
             fontSize: 12,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            boxShadow: '0 2px 8px rgba(44,199,167,0.35)',
+            boxShadow: '0 4px 14px rgba(44, 199, 167, 0.25)',
           }}
         >
-          <Edit3 size={13} color="#081A18" strokeWidth={2.5} /> Edit Settings
+          <Edit3 size={14} color="#081A18" strokeWidth={2.2} /> Edit Settings
         </button>
       </div>
 
@@ -1456,13 +1678,13 @@ function BudgetDetailScreen({
       </div>
 
       {/* Matching Transactions list */}
-      <div style={{ padding: '0 20px', marginTop: 20, paddingBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontWeight: 700, fontSize: 15, color: theme.text }}>
+      <div style={{ padding: '0 20px', marginTop: 24, paddingBottom: 28 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <span style={{ fontWeight: 800, fontSize: 16, color: theme.text, letterSpacing: -0.3 }}>
             Transactions in {budget.name} ({matchingTx.length})
           </span>
         </div>
-        <div style={{ backgroundColor: theme.surface, borderRadius: 8, border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+        <div style={{ backgroundColor: theme.surface, borderRadius: 16, border: `1px solid ${theme.border}`, overflow: 'hidden', boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none' }}>
           {matchingTx.length === 0 ? (
             <p style={{ textAlign: 'center', padding: '24px 16px', fontSize: 13, color: theme.textSec }}>
               No expenses recorded in this budget category yet.
@@ -1656,65 +1878,122 @@ function ExpensesScreen({
       )}
 
       {/* Header */}
-      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => onNav('home')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-            <ChevronLeft size={20} color="#081A18" strokeWidth={2.5} />
+      <div style={{ padding: '20px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={() => onNav('home')}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: theme.mode === 'light' ? 'rgba(35, 181, 151, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            <ChevronLeft size={20} color={EMERALD} strokeWidth={2.2} />
           </button>
-          <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: theme.text }}>Expense Manager</h1>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, color: theme.text, margin: 0 }}>Expense Manager</h1>
+            <p style={{ fontSize: 11, color: theme.textSec, margin: 0, marginTop: 2 }}>Fixed vs Miscellaneous breakdown</p>
+          </div>
         </div>
-        <button onClick={() => onNav('add-expense')} style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
+        <button
+          onClick={() => onNav('add-expense')}
+          style={{
+            backgroundColor: EMERALD,
+            color: '#081A18',
+            border: 'none',
+            borderRadius: 12,
+            width: 38,
+            height: 38,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(44, 199, 167, 0.25)',
+          }}
+        >
           <Plus size={18} color="#081A18" strokeWidth={2.5} />
         </button>
       </div>
 
-      {/* Category Breakdown Card */}
+      {/* Category Breakdown Cards */}
       <div style={{ padding: '0 20px', marginTop: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '14px', border: `1px solid ${theme.border}` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <div style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(59,130,246,0.35)' }}>
-                <Lock size={11} color="#FFFFFF" strokeWidth={2.5} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{
+            backgroundColor: theme.surface,
+            borderRadius: 16,
+            padding: '16px',
+            border: `1px solid ${theme.border}`,
+            boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Lock size={13} color="#2563EB" strokeWidth={2.2} />
               </div>
-              <p style={{ fontSize: 11, color: theme.textSec, fontWeight: 600 }}>Fixed Expenses</p>
+              <p style={{ fontSize: 12, color: theme.textSec, fontWeight: 700, margin: 0 }}>Fixed Expenses</p>
             </div>
-            <p style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{formatMoney(fixedTotal)}</p>
-            <p style={{ fontSize: 10, color: theme.textSec, marginTop: 4 }}>Rent, Bills, School Fees</p>
+            <p style={{ fontSize: 20, fontWeight: 800, color: theme.text, margin: 0, letterSpacing: -0.4 }}>{formatMoney(fixedTotal)}</p>
+            <p style={{ fontSize: 11, color: theme.textSec, marginTop: 4, margin: '4px 0 0' }}>Rent, Bills, School Fees</p>
           </div>
-          <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '14px', border: `1px solid ${theme.border}` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <div style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: EMERALD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(44,199,167,0.35)' }}>
-                <ShoppingBag size={11} color="#081A18" strokeWidth={2.5} />
+          <div style={{
+            backgroundColor: theme.surface,
+            borderRadius: 16,
+            padding: '16px',
+            border: `1px solid ${theme.border}`,
+            boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: 'rgba(44, 199, 167, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShoppingBag size={13} color={theme.mode === 'light' ? '#147A6A' : '#45E5C7'} strokeWidth={2.2} />
               </div>
-              <p style={{ fontSize: 11, color: theme.textSec, fontWeight: 600 }}>Miscellaneous</p>
+              <p style={{ fontSize: 12, color: theme.textSec, fontWeight: 700, margin: 0 }}>Miscellaneous</p>
             </div>
-            <p style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{formatMoney(miscTotal)}</p>
-            <p style={{ fontSize: 10, color: theme.textSec, marginTop: 4 }}>With Exact Entry Dates</p>
+            <p style={{ fontSize: 20, fontWeight: 800, color: theme.text, margin: 0, letterSpacing: -0.4 }}>{formatMoney(miscTotal)}</p>
+            <p style={{ fontSize: 11, color: theme.textSec, marginTop: 4, margin: '4px 0 0' }}>With Exact Entry Dates</p>
           </div>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div style={{ padding: '0 20px', marginTop: 16 }}>
-        <div style={{ display: 'flex', backgroundColor: theme.surface, borderRadius: 6, padding: 3, border: `1px solid ${theme.border}` }}>
+      <div style={{ padding: '0 20px', marginTop: 18 }}>
+        <div style={{ display: 'flex', backgroundColor: theme.surface, borderRadius: 12, padding: 4, border: `1px solid ${theme.border}` }}>
           {[
             { id: 'All', label: 'All Expenses' },
             { id: 'Fixed', label: 'Fixed' },
             { id: 'Misc', label: 'Miscellaneous' },
-          ].map(f => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id as any)}
-              style={{
-                flex: 1, padding: '6px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700,
-                backgroundColor: filter === f.id ? EMERALD : 'transparent',
-                color: filter === f.id ? '#081A18' : theme.textSec,
-                border: 'none', cursor: 'pointer', transition: 'all 0.2s'
-              }}
-            >
-              {f.label}
-            </button>
-          ))}
+          ].map(f => {
+            const isSelected = filter === f.id
+            return (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id as any)}
+                style={{
+                  flex: 1,
+                  padding: '8px 10px',
+                  borderRadius: 9,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  backgroundColor: isSelected
+                    ? (theme.mode === 'light' ? 'rgba(44, 199, 167, 0.18)' : 'rgba(44, 199, 167, 0.22)')
+                    : 'transparent',
+                  color: isSelected
+                    ? (theme.mode === 'light' ? '#147A6A' : '#45E5C7')
+                    : theme.textSec,
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {f.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -2111,56 +2390,94 @@ function AnalyticsScreen({ onNav, transactions }: { onNav: (s: Screen) => void; 
 
   return (
     <div style={{ backgroundColor: theme.bg, flex: 1, overflowY: 'auto' }}>
-      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => onNav('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={22} color={theme.text} />
+      <div style={{ padding: '20px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={() => onNav('home')}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: theme.mode === 'light' ? 'rgba(35, 181, 151, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            <ChevronLeft size={20} color={EMERALD} strokeWidth={2.2} />
           </button>
-          <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: theme.text }}>{t('analytics')}</h1>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, color: theme.text, margin: 0 }}>{t('analytics')}</h1>
+            <p style={{ fontSize: 11, color: theme.textSec, margin: 0, marginTop: 2 }}>Spending metrics & visual trends</p>
+          </div>
         </div>
       </div>
-      <div style={{ padding: '0 20px', marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+
+      <div style={{ padding: '0 20px', marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         {metrics.map(s => (
-          <div key={s.label} style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '14px', border: `1px solid ${theme.border}`, boxShadow: theme.mode === 'light' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none' }}>
-            <p style={{ fontSize: 11, color: theme.textSec }}>{s.label}</p>
-            <p style={{ fontSize: 18, fontWeight: 700, letterSpacing: -0.5, marginTop: 4, color: theme.text }}>{s.value}</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-              {s.up ? <TrendingUp size={11} color={SUCCESS} /> : <TrendingDown size={11} color={ERROR} />}
-              <span style={{ fontSize: 11, color: s.up ? SUCCESS : ERROR }}>{s.change}</span>
+          <div key={s.label} style={{
+            backgroundColor: theme.surface,
+            borderRadius: 16,
+            padding: '16px',
+            border: `1px solid ${theme.border}`,
+            boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none',
+          }}>
+            <p style={{ fontSize: 11, color: theme.textSec, fontWeight: 600, margin: 0 }}>{s.label}</p>
+            <p style={{ fontSize: 19, fontWeight: 800, letterSpacing: -0.4, marginTop: 4, margin: '4px 0 0', color: theme.text }}>{s.value}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
+              {s.up ? <TrendingUp size={12} color={SUCCESS} /> : <TrendingDown size={12} color={ERROR} />}
+              <span style={{ fontSize: 11, fontWeight: 700, color: s.up ? SUCCESS : ERROR }}>{s.change}</span>
             </div>
           </div>
         ))}
       </div>
-      <div style={{ padding: '0 20px', marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-          <BarChart3 size={16} color={EMERALD} fill={EMERALD} />
-          <p style={{ fontWeight: 600, fontSize: 15, color: theme.text }}>Weekly Overview</p>
+
+      <div style={{ padding: '0 20px', marginTop: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <BarChart3 size={18} color={EMERALD} strokeWidth={2.2} />
+          <p style={{ fontWeight: 800, fontSize: 16, color: theme.text, letterSpacing: -0.3, margin: 0 }}>Weekly Overview</p>
         </div>
-        <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '16px', border: `1px solid ${theme.border}` }}>
+        <div style={{
+          backgroundColor: theme.surface,
+          borderRadius: 16,
+          padding: '18px',
+          border: `1px solid ${theme.border}`,
+          boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none',
+        }}>
           <ResponsiveContainer width="100%" height={150}>
             <BarChart data={dynamicWeeklyData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: theme.textSec }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ backgroundColor: theme.tooltipBg, border: `1px solid ${theme.border}`, borderRadius: 8, fontSize: 12, color: theme.text }} />
-              <Bar dataKey="income" fill={SUCCESS} radius={[2, 2, 0, 0]} opacity={0.85} />
-              <Bar dataKey="expense" fill={EMERALD} radius={[2, 2, 0, 0]} opacity={0.85} />
+              <Tooltip contentStyle={{ backgroundColor: theme.tooltipBg, border: `1px solid ${theme.border}`, borderRadius: 10, fontSize: 12, color: theme.text }} />
+              <Bar dataKey="income" fill={SUCCESS} radius={[4, 4, 0, 0]} opacity={0.85} />
+              <Bar dataKey="expense" fill={EMERALD} radius={[4, 4, 0, 0]} opacity={0.85} />
             </BarChart>
           </ResponsiveContainer>
-          <div style={{ display: 'flex', gap: 16, marginTop: 8, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 16, marginTop: 10, justifyContent: 'center' }}>
             {[{ color: SUCCESS, label: 'Income' }, { color: EMERALD, label: 'Expense' }].map(l => (
               <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: l.color }} />
-                <span style={{ fontSize: 11, color: theme.textSec }}>{l.label}</span>
+                <div style={{ width: 8, height: 8, borderRadius: 99, backgroundColor: l.color }} />
+                <span style={{ fontSize: 11, color: theme.textSec, fontWeight: 600 }}>{l.label}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
-      <div style={{ padding: '0 20px', marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-          <PieIcon size={16} color={EMERALD} fill={EMERALD} />
-          <p style={{ fontWeight: 600, fontSize: 15, color: theme.text }}>Spending Categories</p>
+
+      <div style={{ padding: '0 20px', marginTop: 22, paddingBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <PieIcon size={18} color={EMERALD} strokeWidth={2.2} />
+          <p style={{ fontWeight: 800, fontSize: 16, color: theme.text, letterSpacing: -0.3, margin: 0 }}>Spending Categories</p>
         </div>
-        <div style={{ backgroundColor: theme.surface, borderRadius: 8, padding: '16px', border: `1px solid ${theme.border}` }}>
+        <div style={{
+          backgroundColor: theme.surface,
+          borderRadius: 16,
+          padding: '18px',
+          border: `1px solid ${theme.border}`,
+          boxShadow: theme.mode === 'light' ? '0 2px 12px rgba(0,0,0,0.03)' : 'none',
+        }}>
           {dynamicCategories.length === 0 ? (
             <p style={{ textAlign: 'center', padding: '16px 0', fontSize: 13, color: theme.textSec }}>
               No category expense data recorded yet.
