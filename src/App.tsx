@@ -3568,11 +3568,11 @@ export default function App() {
   const showNav = mainScreens.includes(screen)
   const isPreAuth = ['splash', 'onboarding', 'signin'].includes(screen)
 
-  // Phone dimensions
-  const phoneW = 393
-  const phoneH = 852
-  const bezel = 12
-  const frameRadius = 58
+  // Phone dimensions - iPhone 17 Pro Max Chassis Specification
+  const phoneW = 402
+  const phoneH = 874
+  const bezel = 9
+  const frameRadius = 56
   const totalW = phoneW + bezel * 2 + 8
   const totalH = phoneH + bezel * 2
 
@@ -3631,8 +3631,8 @@ export default function App() {
         {/* Ambient glow behind phone */}
         <div style={{
           position: 'absolute',
-          width: 500,
-          height: 500,
+          width: 520,
+          height: 520,
           borderRadius: '50%',
           background: isDark
             ? 'radial-gradient(circle, rgba(44,199,167,0.08) 0%, transparent 70%)'
@@ -3662,34 +3662,45 @@ export default function App() {
           </button>
         )}
 
-        {/* Scaled Phone Wrapper */}
+        {/* Scaled iPhone 17 Pro Max Frame Wrapper */}
         <div style={{
           transform: `scale(${scale})`,
           transformOrigin: 'center center',
           transition: 'transform 0.3s ease',
         }}>
-          {/* Phone Frame */}
+          {/* iPhone 17 Pro Max Titanium Frame */}
           <div style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', left: -3, top: 140, width: 4, height: 28, backgroundColor: isDark ? '#2a2a2a' : '#c0c0c0', borderRadius: '3px 0 0 3px' }} />
-            <div style={{ position: 'absolute', left: -3, top: 190, width: 4, height: 52, backgroundColor: isDark ? '#2a2a2a' : '#c0c0c0', borderRadius: '3px 0 0 3px' }} />
-            <div style={{ position: 'absolute', left: -3, top: 252, width: 4, height: 52, backgroundColor: isDark ? '#2a2a2a' : '#c0c0c0', borderRadius: '3px 0 0 3px' }} />
-            <div style={{ position: 'absolute', right: -3, top: 210, width: 4, height: 72, backgroundColor: isDark ? '#2a2a2a' : '#c0c0c0', borderRadius: '0 3px 3px 0' }} />
+            {/* Left Side Buttons & Antenna Bands */}
+            <div style={{ position: 'absolute', left: -3.5, top: 80, width: 3.5, height: 4, backgroundColor: isDark ? '#1a191e' : '#a8a6b0', borderRadius: '1px 0 0 1px' }} />
+            {/* Action Button */}
+            <div style={{ position: 'absolute', left: -3.5, top: 115, width: 3.5, height: 26, backgroundColor: isDark ? '#48474d' : '#c4c2cc', borderRadius: '2px 0 0 2px' }} />
+            {/* Volume Up */}
+            <div style={{ position: 'absolute', left: -3.5, top: 162, width: 3.5, height: 52, backgroundColor: isDark ? '#48474d' : '#c4c2cc', borderRadius: '2px 0 0 2px' }} />
+            {/* Volume Down */}
+            <div style={{ position: 'absolute', left: -3.5, top: 226, width: 3.5, height: 52, backgroundColor: isDark ? '#48474d' : '#c4c2cc', borderRadius: '2px 0 0 2px' }} />
+            <div style={{ position: 'absolute', left: -3.5, top: 770, width: 3.5, height: 4, backgroundColor: isDark ? '#1a191e' : '#a8a6b0', borderRadius: '1px 0 0 1px' }} />
 
-            {/* Outer phone body */}
+            {/* Right Side Buttons & Antenna Bands */}
+            <div style={{ position: 'absolute', right: -3.5, top: 80, width: 3.5, height: 4, backgroundColor: isDark ? '#1a191e' : '#a8a6b0', borderRadius: '0 1px 1px 0' }} />
+            {/* Power Button */}
+            <div style={{ position: 'absolute', right: -3.5, top: 190, width: 3.5, height: 78, backgroundColor: isDark ? '#48474d' : '#c4c2cc', borderRadius: '0 2px 2px 0' }} />
+            <div style={{ position: 'absolute', right: -3.5, top: 770, width: 3.5, height: 4, backgroundColor: isDark ? '#1a191e' : '#a8a6b0', borderRadius: '0 1px 1px 0' }} />
+
+            {/* Outer Titanium Chassis */}
             <div style={{
               width: phoneW + bezel * 2,
               height: phoneH + bezel * 2,
               borderRadius: frameRadius,
               background: isDark
-                ? 'linear-gradient(145deg, #3a3a3c 0%, #1c1c1e 30%, #2c2c2e 60%, #1a1a1c 100%)'
-                : 'linear-gradient(145deg, #e8e8ed 0%, #d1d1d6 30%, #e0e0e5 60%, #c7c7cc 100%)',
+                ? 'linear-gradient(135deg, #48474d 0%, #252429 25%, #3d3c42 50%, #1b1a1f 75%, #35343a 100%)'
+                : 'linear-gradient(135deg, #e6e5ec 0%, #cac8d2 25%, #dedde4 50%, #b8b6c0 75%, #d6d5dc 100%)',
               padding: bezel,
               position: 'relative',
               boxShadow: isDark
-                ? `0 50px 100px -20px rgba(0,0,0,0.8), 0 30px 60px -30px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.15)`
-                : `0 50px 100px -20px rgba(0,0,0,0.25), 0 30px 60px -30px rgba(0,0,0,0.15), 0 0 0 0.5px rgba(0,0,0,0.12)`,
+                ? `0 50px 100px -20px rgba(0,0,0,0.85), 0 30px 60px -30px rgba(0,0,0,0.6), inset 0 0 0 1.5px rgba(255,255,255,0.18), inset 0 0 0 3px rgba(0,0,0,0.5)`
+                : `0 50px 100px -20px rgba(0,0,0,0.3), 0 30px 60px -30px rgba(0,0,0,0.2), inset 0 0 0 1.5px rgba(255,255,255,0.8), inset 0 0 0 3px rgba(0,0,0,0.15)`,
             }}>
-              {/* Inner screen */}
+              {/* Inner OLED Screen Container */}
               <div style={{
                 width: phoneW,
                 height: phoneH,
@@ -3700,38 +3711,63 @@ export default function App() {
                 flexDirection: 'column',
                 position: 'relative',
               }}>
-                {/* Dynamic Island */}
+                {/* Dynamic Island Pill */}
                 <div style={{
                   position: 'absolute',
-                  top: 12,
+                  top: 10,
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: 126,
-                  height: 37,
+                  width: 122,
+                  height: 35,
                   backgroundColor: '#000000',
-                  borderRadius: 22,
+                  borderRadius: 20,
                   zIndex: 12,
                   display: 'flex',
                   alignItems: 'center',
-                  justify: 'flex-end',
-                  paddingRight: 14,
-                  gap: 8,
+                  justifyContent: 'space-between',
+                  paddingLeft: 12,
+                  paddingRight: 12,
+                  boxShadow: '0 0 0 0.5px rgba(255,255,255,0.08)'
                 }}>
+                  {/* TrueDepth Lens */}
                   <div style={{
-                    width: 12,
-                    height: 12,
+                    width: 11,
+                    height: 11,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle at 35% 35%, #1a2744 0%, #0a1225 50%, #060d1a 100%)',
+                    background: 'radial-gradient(circle at 35% 35%, #1c2b48 0%, #0c1424 60%, #050810 100%)',
+                    boxShadow: 'inset 0 0 2px rgba(255,255,255,0.2)'
+                  }} />
+                  {/* Ambient Sensor */}
+                  <div style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: '#0a0d12',
+                    border: '1px solid rgba(255,255,255,0.05)'
                   }} />
                 </div>
 
                 {/* Status Bar */}
                 <StatusBar />
 
-                {/* Screen content */}
+                {/* Screen Content */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                   {renderScreen()}
                 </div>
+
+                {/* iOS Home Indicator Bar */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 8,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 134,
+                  height: 5,
+                  borderRadius: 10,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  zIndex: 15,
+                  pointerEvents: 'none'
+                }} />
 
                 {/* Modals & Toast */}
                 {activeModal === 'security' && <SecurityModal onClose={() => setActiveModal(null)} theme={theme} />}
